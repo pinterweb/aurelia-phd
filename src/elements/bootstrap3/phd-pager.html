@@ -1,0 +1,25 @@
+<template>
+  <nav aria-label="Page navigation" class="text-center">
+    <ul class="pagination">
+      <li show.bind="shortened && pageNumber >= 5">
+        <a click.delegate="pageNumber=0">1</a>
+      </li>
+      <li show.bind="shortened && pageNumber >= 5">
+        <span>&hellip;</span>
+      </li>
+      <li repeat.for="pageId of pageBuffer">
+        <a
+          class="${pageNumber === pageId ? 'active' : ''}"
+          click.delegate="pageNumber=pageId"
+          >${pageId + 1}</a
+        >
+      </li>
+      <li show.bind="shortened && pageNumber <= totalPages - 6">
+        <span class="pagination-ellipsis">&hellip;</span>
+      </li>
+      <li show.bind="shortened && pageNumber <= totalPages - 6">
+        <a click.delegate="pageNumber=(totalPages - 1)">${totalPages}</a>
+      </li>
+    </ul>
+  </nav>
+</template>

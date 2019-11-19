@@ -1,0 +1,10 @@
+<template bindable="row">
+  <div class="checkbox">
+    <input
+      id="select${row.index}"
+      type="checkbox"
+      checked.bind="row.selected"
+      model.bind="item"
+    />
+  </div>
+</template>

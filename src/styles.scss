@@ -1,0 +1,10 @@
+@import "variables.scss";
+
+td > phd-table > table {
+  border: $nested-table-border;
+}
+
+.table__cell--clickable {
+  cursor: pointer;
+  text-align: center !important;
+}

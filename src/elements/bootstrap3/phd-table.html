@@ -1,0 +1,54 @@
+<template>
+  <require from="./header-selector.html"></require>
+  <require from="./cell-selector.html"></require>
+  <require from="./no-items-area.html"></require>
+
+  <table class="table table-hoverable">
+    <thead>
+      <tr>
+        <th width="0px" show.bind="options.selectable">
+          <header-selector
+            row.bind="_headerRow"
+            click.delegate="_selectAllRows()"
+          ></header-selector>
+        </th>
+        <th repeat.for="column of _columns">
+          <a click.delegate="_headerClicked({ $event, column })">
+            ${column.header.name || column.header}
+            <span show.bind="column.sort">
+              <span show.bind="column.sort.direction === 'asc'">&#9660;</span>
+              <span show.bind="column.sort.direction === 'desc'">&#9650;</span>
+            </span>
+          </a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        repeat.for="row of _rows | phdSort:_sorts | phdPage:page.size:page.pageNumber"
+      >
+        <td show.bind="options.selectable">
+          <cell-selector
+            row.bind="{ index: $index, selected: selectedItems }"
+            item.bind="row.item"
+          ></cell-selector>
+        </td>
+        <td
+          repeat.for="column of _columns"
+          class="${column.className}"
+          click.capture="_cellClicked($event, { row })"
+        >
+          <span
+            if.bind="column.renderer"
+            style.bind="column.style"
+            enhance-html="${column.renderer({ item: row.item })}"
+          ></span>
+          <span else>${_getFieldData(row.item, column)}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div show.bind="!items.length">
+    <no-items-area></no-items-area>
+  </div>
+</template>

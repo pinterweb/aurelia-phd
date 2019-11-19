@@ -1,0 +1,12 @@
+<template bindable="row, item">
+  <div class="field">
+    <input
+      class="is-checkradio is-small"
+      id="select${row.index}"
+      type="checkbox"
+      checked.bind="row.selected"
+      model.bind="item"
+    />
+    <label for="select${row.index}"></label>
+  </div>
+</template>

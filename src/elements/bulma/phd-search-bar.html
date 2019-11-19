@@ -1,0 +1,26 @@
+<template>
+  <form submit.delegate="handleSubmit($event)">
+    <div class="field has-addons">
+      <div class="control has-icons-left has-icons-right is-expanded">
+        <input
+          class="input is-primary"
+          type="text"
+          placeholder="Search"
+          value.bind="searchTerm"
+          keyup.delegate="handleKeypress($event)"
+        />
+        <span
+          style="pointer-events: initial"
+          click.trigger="clear()"
+          class="icon is-small is-left"
+        >
+          <span show.bind="!searchTerm">&#128269;</span>
+          <span show.bind="searchTerm">&#215;</span>
+        </span>
+      </div>
+      <div class="control">
+        <button type="submit" class="button is-primary">Search</button>
+      </div>
+    </div>
+  </form>
+</template>

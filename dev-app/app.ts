@@ -23,7 +23,11 @@ export class App {
       field: "percentComplete"
     },
     {
-      field: "start"
+      field: "start",
+      hidden: true,
+      sort: {
+        direction: "asc"
+      }
     },
     {
       field: "finish"

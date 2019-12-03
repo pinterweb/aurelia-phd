@@ -162,8 +162,7 @@ export class PhdTableCustomElement<T> {
         header:
           !c.header && typeof c.field === "string"
             ? toTitleCase(c.field)
-            : c.header,
-        sort: c.sort ? { ...c.sort, field: c.field } : c.sort
+            : c.header
       }));
 
     this.optionsChanged();
@@ -247,7 +246,11 @@ export class PhdTableCustomElement<T> {
   }
 
   _sort(): void {
-    this._sorts = this._columns
+    this._sorts = this.columns
+      .map(c => ({
+        ...c,
+        sort: c.sort ? { ...c.sort, field: c.field } : c.sort
+      }))
       .filter(c => c.sort)
       .map(c => c.sort)
       .sort((a, b) => a.order - b.order);

@@ -246,7 +246,7 @@ export class PhdTableCustomElement<T> {
   }
 
   _sort(): void {
-    this._sorts = this.columns
+    this._sorts = this._columns
       .map(c => ({
         ...c,
         sort: c.sort ? { ...c.sort, field: c.field } : c.sort

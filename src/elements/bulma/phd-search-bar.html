@@ -1,26 +1,23 @@
 <template>
-  <form submit.delegate="handleSubmit($event)">
-    <div class="field has-addons">
+  <require from="./tagsinput"></require>
+
+  <form submit.delegate="_handleSubmit($event)">
+    <div class="field is-grouped">
       <div class="control has-icons-left has-icons-right is-expanded">
-        <input
-          class="input is-primary"
-          type="text"
-          placeholder="Search"
-          value.bind="searchTerm"
-          keyup.delegate="handleKeypress($event)"
-        />
+        <tagsinput tag-removed.delegate="_removeFilter($event.detail)"
+        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></tagsinput>
         <span
           style="pointer-events: initial"
-          click.trigger="clear()"
+          click.trigger="_clear()"
           class="icon is-small is-left"
         >
-          <span show.bind="!searchTerm">&#128269;</span>
-          <span show.bind="searchTerm">&#215;</span>
+          <span class="input__icon--clickable" show.bind="!_tags.length">&#128269;</span>
+          <span class="input__icon--clickable" show.bind="_tags.length">&#215;</span>
         </span>
       </div>
-      <div class="control">
+      <p class="control">
         <button type="submit" class="button is-primary">Search</button>
-      </div>
+      </p>
     </div>
   </form>
 </template>

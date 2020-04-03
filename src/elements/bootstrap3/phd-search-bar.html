@@ -11,7 +11,7 @@
           type="text"
           placeholder="Search"
           value.bind="searchTerm"
-          keyup.delegate="handleKeypress($event)"
+          keydown.delegate="handleKeydown($event)"
         />
         <span class="input-group-btn">
           <button class="btn btn-primary" type="submit">Search</button>

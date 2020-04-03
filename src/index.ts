@@ -8,7 +8,7 @@ import "./styles.css";
 import * as framework from "./elements/index";
 
 export * from "./model";
-export { FilterEventDetail } from "./elements/phd-search-bar";
+export { FilterEventDetail, Filter } from "./elements/phd-search-bar";
 
 interface PluginOptions {
   framework: string;

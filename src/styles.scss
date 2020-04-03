@@ -8,3 +8,11 @@ td > phd-table > table {
   cursor: pointer;
   text-align: center !important;
 }
+
+.input__icon--clickable {
+  cursor: pointer;
+}
+
+phd-search-bar {
+  padding: 1em;
+}

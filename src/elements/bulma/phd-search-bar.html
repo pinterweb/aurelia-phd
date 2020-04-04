@@ -2,15 +2,22 @@
   <form submit.delegate="_handleSubmit($event)">
     <div class="field is-grouped">
       <div class="control has-icons-left has-icons-right is-expanded">
-        <phd-tags-input tag-removed.delegate="_removeFilter($event.detail)"
-        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></phd-tags-input>
+        <phd-tags-input
+          tag-removed.delegate="_removeFilter($event.detail)"
+          change.delegate="_tagAdded($event.target.value)"
+          tags.bind="_tags"
+        ></phd-tags-input>
         <span
           style="pointer-events: initial"
           click.trigger="_clear()"
           class="icon is-small is-left"
         >
-          <span class="input__icon--clickable" show.bind="!_tags.length">&#128269;</span>
-          <span class="input__icon--clickable" show.bind="_tags.length">&#215;</span>
+          <span class="input__icon--clickable" show.bind="!_tags.length"
+            >&#128269;</span
+          >
+          <span class="input__icon--clickable" show.bind="_tags.length"
+            >&#215;</span
+          >
         </span>
       </div>
       <p class="control">

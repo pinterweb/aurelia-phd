@@ -6,13 +6,15 @@
           <span show.bind="!searchTerm">&#128269;</span>
           <span show.bind="searchTerm">&#215;</span>
         </span>
-        <phd-tags-input tag-removed.delegate="_removeFilter($event.detail)"
-        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></phd-tags-input>
+        <phd-tags-input
+          tag-removed.delegate="_removeFilter($event.detail)"
+          change.delegate="_tagAdded($event.target.value)"
+          tags.bind="_tags"
+        ></phd-tags-input>
         <span class="input-group-btn">
           <button class="btn btn-primary" type="submit">Search</button>
         </span>
       </div>
     </div>
   </form>
-
 </template>

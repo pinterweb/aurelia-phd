@@ -16,3 +16,17 @@ td > phd-table > table {
 phd-search-bar {
   padding: 1em;
 }
+
+.field__tag {
+  margin-bottom: 0.1em !important;
+  margin-top: 0.1em !important;
+  border: none;
+}
+
+.tagsinput__field {
+  height: auto !important;
+}
+
+.tag__input {
+  border: none;
+}

@@ -1,11 +1,9 @@
 <template>
-  <require from="./tagsinput"></require>
-
   <form submit.delegate="_handleSubmit($event)">
     <div class="field is-grouped">
       <div class="control has-icons-left has-icons-right is-expanded">
-        <tagsinput tag-removed.delegate="_removeFilter($event.detail)"
-        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></tagsinput>
+        <phd-tags-input tag-removed.delegate="_removeFilter($event.detail)"
+        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></phd-tags-input>
         <span
           style="pointer-events: initial"
           click.trigger="_clear()"

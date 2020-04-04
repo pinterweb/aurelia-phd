@@ -1,22 +1,18 @@
 <template>
-  <form submit.delegate="handleSubmit($event)">
+  <form submit.delegate="_handleSubmit($event)">
     <div class="form-group">
       <div class="input-group">
         <span click.trigger="clear()" class="input-group-addon">
           <span show.bind="!searchTerm">&#128269;</span>
           <span show.bind="searchTerm">&#215;</span>
         </span>
-        <input
-          class="form-control"
-          type="text"
-          placeholder="Search"
-          value.bind="searchTerm"
-          keydown.delegate="handleKeydown($event)"
-        />
+        <phd-tags-input tag-removed.delegate="_removeFilter($event.detail)"
+        change.delegate="_tagAdded($event.target.value)" tags.bind="_tags"></phd-tags-input>
         <span class="input-group-btn">
           <button class="btn btn-primary" type="submit">Search</button>
         </span>
       </div>
     </div>
   </form>
+
 </template>

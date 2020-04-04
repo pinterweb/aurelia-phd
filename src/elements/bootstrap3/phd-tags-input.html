@@ -1,0 +1,31 @@
+<template>
+  <div ref="_$field" class="tagsinput__field form-control">
+    <div>
+      <span
+        class="label label-default field__tag"
+        style="margin-right:0.75rem"
+        repeat.for="t of tags"
+        show.bind="t"
+      >
+        ${t}
+        <span
+          class="input__icon--clickable"
+          click.trigger="_removeButtonClicked($index)"
+        >
+          &times;
+        </span>
+      </span>
+      <slot>
+        <input
+          class="tag__input"
+          style.bind="_inputStyle"
+          placeholder="New Tag"
+          value.bind="_newTagValue"
+          type="text"
+          change.delegate="_inputChanged()"
+          keydown.delegate="_handleKeydown($event)"
+        />
+      </slot>
+    </div>
+  </div>
+</template>

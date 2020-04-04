@@ -1,7 +1,7 @@
 import { DOM, children } from "aurelia-framework";
 import { bindable } from "aurelia-templating";
 
-export class TagsinputCustomElement {
+export class PhdTagsInputCustomElement {
   @bindable tags = [];
   @children(".field__tag") _$controls: HTMLElement[] = [];
 
@@ -69,7 +69,7 @@ export class TagsinputCustomElement {
     if (event.key === "Tab") {
       // does not work nicely with the search bar
       return false;
-    } else if (event.key ===  "Escape") {
+    } else if (event.key === "Escape") {
       this._newTagValue = null;
     }
 

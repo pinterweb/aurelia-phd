@@ -8,7 +8,7 @@ type SearchableItem = any;
 type FilterMethod = (items: SearchableItem[]) => SearchableItem[];
 
 export interface FilterEventDetail {
-  filter: string;
+  filter: Filter[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filteredItems: any[];
 }
@@ -117,7 +117,12 @@ export class PhdSearchBarCustomElement {
       DOM.createCustomEvent("filtered", {
         bubbles: true,
         detail: {
-          filter: this._filters,
+          filter: this._filters.map<Filter>(f => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { tags, ...filter } = f;
+
+            return filter;
+          }),
           filteredItems: this._filterLike()
         }
       })
@@ -171,7 +176,7 @@ export class PhdSearchBarCustomElement {
     });
   }
 
-  _isFilterArray(value: any): value is Filter[] {
+  _isFilterArray<T>(value: any): value is Filter[] {
     return value && value.length && typeof value[0].display !== "undefined";
   }
 

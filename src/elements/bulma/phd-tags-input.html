@@ -1,0 +1,29 @@
+<template>
+  <div
+    ref="_$field"
+    class="tagsinput__field field is-grouped is-grouped-multiline input"
+  >
+    <div class="control field__tag" repeat.for="t of tags">
+      <div class="tags has-addons">
+        <span class="tag">
+          ${t}
+        </span>
+        <a
+          click.delegate="_removeButtonClicked($index)"
+          class="tag is-delete"
+        ></a>
+      </div>
+    </div>
+    <slot>
+      <input
+        class="tag__input"
+        style.bind="_inputStyle"
+        placeholder="New Tag"
+        value.bind="_newTagValue"
+        type="text"
+        change.delegate="_inputChanged()"
+        keydown.delegate="_handleKeydown($event)"
+      />
+    </slot>
+  </div>
+</template>

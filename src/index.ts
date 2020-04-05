@@ -8,7 +8,7 @@ import "./styles.css";
 import * as framework from "./elements/index";
 
 export * from "./model";
-export { FilterEventDetail } from "./elements/phd-search-bar";
+export { FilterEventDetail, Filter } from "./elements/phd-search-bar";
 
 interface PluginOptions {
   framework: string;
@@ -24,6 +24,7 @@ export function configure(
     PLATFORM.moduleName("./elements/phd-table"),
     PLATFORM.moduleName("./elements/phd-search-bar"),
     PLATFORM.moduleName("./elements/phd-pager"),
+    PLATFORM.moduleName("./elements/phd-tags-input"),
     PLATFORM.moduleName("./value-converters/phd-page-value-converter"),
     PLATFORM.moduleName("./value-converters/phd-sort-value-converter"),
     PLATFORM.moduleName("./attributes/enhance-html")

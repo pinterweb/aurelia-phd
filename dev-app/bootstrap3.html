@@ -36,6 +36,7 @@
   <div class="container">
     <div>
       <phd-search-bar
+        filter.bind="_searchFilter"
         items.bind="allItems"
         filtered.delegate="_filteredItems=$event.detail.filteredItems"
       ></phd-search-bar>

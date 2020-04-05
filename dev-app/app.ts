@@ -1,4 +1,11 @@
 import { inject } from "aurelia-framework";
+import { Filter, Column, Header } from "resources";
+
+interface ExtendedColumn extends Column {
+  [x: string]: any;
+}
+
+const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 
 @inject("defaultOptions")
 export class App {
@@ -9,7 +16,9 @@ export class App {
     pageNumber: 0
   };
 
-  _itemColumns = [
+  _searchFilter: Filter[];
+
+  _itemColumns: ExtendedColumn[] = [
     {
       field: "id"
     },
@@ -17,10 +26,12 @@ export class App {
       field: "title"
     },
     {
-      field: "duration"
+      field: "duration",
+      filter: [65]
     },
     {
-      field: "percentComplete"
+      field: "percentComplete",
+      header: "% Complete"
     },
     {
       field: "start",
@@ -34,10 +45,25 @@ export class App {
     },
     {
       field: "effortDriven"
+    },
+    {
+      field: ["author", "firstName"],
+      header: "Author"
     }
   ];
 
-  constructor(private _options) {}
+  constructor(private _options) {
+    this._searchFilter = this._itemColumns.map<Filter>(i => {
+      const fields = Array.isArray(i.field) ? i.field : [i.field];
+      const header = i.header && ((i.header as Header).name || i.header);
+
+      return {
+        fields,
+        display: header || (!Array.isArray(i.field) ? i.field : i.field[0]),
+        values: i.filter || []
+      } as Filter;
+    });
+  }
 
   activate(): void {
     for (let i = 0; i < 500; i++) {
@@ -45,6 +71,7 @@ export class App {
       const randomMonth = Math.floor(Math.random() * 11);
       const randomDay = Math.floor(Math.random() * 29);
       const randomPercent = Math.round(Math.random() * 100);
+      const randomAuthor = Math.round(Math.random() * 6);
 
       this.allItems[i] = {
         id: i,
@@ -53,7 +80,8 @@ export class App {
         percentComplete: randomPercent,
         start: `${randomYear}-${randomMonth}-${randomDay}`,
         finish: `${randomYear}-${randomMonth}-${randomDay}`,
-        effortDriven: i % 5 === 0
+        effortDriven: i % 5 === 0,
+        author: { firstName: authors[randomAuthor] }
       };
     }
   }

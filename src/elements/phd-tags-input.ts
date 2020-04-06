@@ -2,6 +2,7 @@ import { DOM, children } from "aurelia-framework";
 import { bindable } from "aurelia-templating";
 
 export class PhdTagsInputCustomElement {
+  @bindable placeholder = "New tag";
   @bindable tags = [];
   @children(".field__tag") _$controls: HTMLElement[] = [];
 

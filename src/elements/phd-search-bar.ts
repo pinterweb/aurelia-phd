@@ -11,6 +11,7 @@ export interface FilterEventDetail {
   filter: Filter[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filteredItems: any[];
+  queryString: string;
 }
 
 /**
@@ -29,6 +30,27 @@ interface ExtendedFilter extends Filter {
 interface TagValue {
   value: any;
   tagIndex: number;
+}
+
+function _objToQueryStr(params: { [key: string]: string | string[] }): string {
+  return Object.keys(params)
+    .filter(key => key !== "id" && !!params[key])
+    .map(key => {
+      if (Array.isArray(params[key])) {
+        return (params[key] as string[])
+          .map(
+            val =>
+              encodeURIComponent(key) + "=" + encodeURIComponent(val.toString())
+          )
+          .join("&");
+      }
+      return (
+        encodeURIComponent(key) +
+        "=" +
+        encodeURIComponent(params[key].toString())
+      );
+    })
+    .join("&");
 }
 
 export class PhdSearchBarCustomElement {
@@ -67,19 +89,21 @@ export class PhdSearchBarCustomElement {
 
   _tagAdded(term: string): void {
     const keyValue = term.split("=").map(f => f.trim());
+    const hasPropName = keyValue.length > 1;
+
     let targetFilter = this._filters.find(
       s =>
         s.display.toLowerCase() ===
-        (keyValue.length === 1 ? "" : keyValue[0].toLowerCase())
+        (!hasPropName ? "" : keyValue[0].toLowerCase())
     );
 
     if (targetFilter) {
-      targetFilter.values.push(keyValue[1] || term);
+      targetFilter.values.push((keyValue[1] || term).trim());
     } else {
       targetFilter = {
-        display: "",
-        fields: [],
-        values: [term],
+        display: hasPropName ? keyValue[0] : "",
+        fields: hasPropName ? [keyValue[0]] : [],
+        values: [hasPropName ? keyValue[1].trim() : term.trim()],
         tags: []
       };
       this._filters.push(targetFilter);
@@ -100,6 +124,14 @@ export class PhdSearchBarCustomElement {
 
     filter.values.splice(targetTagIndex, 1);
     filter.tags.splice(targetTagIndex, 1);
+
+    const otherTags = []
+      .concat(...this._filters.map(f => f.tags))
+      .filter(t => t.tagIndex > index);
+
+    for (const tag of otherTags) {
+      tag.tagIndex--;
+    }
 
     this._handleSubmit();
   }
@@ -123,7 +155,16 @@ export class PhdSearchBarCustomElement {
 
             return filter;
           }),
-          filteredItems: this._filterLike()
+          filteredItems: this._filterLike(),
+          queryString: _objToQueryStr(
+            this._filters.reduce(
+              (accu, f) => ({
+                ...accu,
+                [f.fields.join(".")]: f.values.join()
+              }),
+              {}
+            )
+          )
         }
       })
     );
@@ -132,12 +173,6 @@ export class PhdSearchBarCustomElement {
   }
 
   _filterLike(): SearchableItem[] {
-    if (!this.items || !this.items.length) {
-      return this.items;
-    }
-
-    if (this.method) return this.method(this.items);
-
     this._tags = [].concat(
       ...this._filters
         .filter(s => s.values.length)
@@ -152,27 +187,41 @@ export class PhdSearchBarCustomElement {
         })
     );
 
-    return this.items.filter(v => {
+    if (!this.items || !this.items.length) {
+      return this.items;
+    }
+
+    if (this.method) return this.method(this.items);
+
+    return this.items.filter(i => {
       let evaluations = [];
+
       for (const term of this._filters) {
         if (!term.fields.length) {
           evaluations = evaluations.concat(
-            term.values.map(val => this._searchAnyField(v, val))
+            term.values.map(val => this._searchAnyField(i, val))
           );
         } else {
+          const itemVal = getIn(i, term.fields);
+
           evaluations = evaluations.concat(
             term.values.map(
               val =>
-                val.toString().toLowerCase() ===
-                getIn(v, term.fields)
-                  .toString()
-                  .toLowerCase()
+                itemVal !== null &&
+                // if there is custom fields we do not know about, we have to assume
+                // it was filtered on the server so let every value through
+                (typeof itemVal === "undefined" ||
+                  val.toString().toLowerCase() ===
+                    itemVal
+                      .toString()
+                      .trim()
+                      .toLowerCase())
             )
           );
         }
       }
 
-      return evaluations.every(e => e === true);
+      return !evaluations.length || evaluations.some(e => e === true);
     });
   }
 
@@ -183,6 +232,8 @@ export class PhdSearchBarCustomElement {
   _searchAnyField<T>(item: T, term: string): boolean {
     return Object.values(item).some(
       v =>
+        typeof v !== "undefined" &&
+        v !== null &&
         v
           .toString()
           .toLowerCase()

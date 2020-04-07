@@ -1,8 +1,8 @@
 <template>
-  <div ref="_$field" class="tagsinput__field form-control">
+  <div ref="_$field" class="tags-input form-control">
     <div>
       <span
-        class="label label-default field__tag"
+        class="label label-default tags-input__tag"
         style="margin-right:0.75rem"
         repeat.for="t of tags"
         show.bind="t"
@@ -17,7 +17,7 @@
       </span>
       <slot>
         <input
-          class="tag__input"
+          class="tags-input__input"
           style.bind="_inputStyle"
           placeholder="${placeholder}"
           value.bind="_newTagValue"

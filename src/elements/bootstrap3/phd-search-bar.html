@@ -7,6 +7,7 @@
           <span show.bind="searchTerm">&#215;</span>
         </span>
         <phd-tags-input
+          placeholder="New filter"
           tag-removed.delegate="_removeFilter($event.detail)"
           change.delegate="_tagAdded($event.target.value)"
           tags.bind="_tags"

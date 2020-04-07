@@ -4,7 +4,7 @@ import { bindable } from "aurelia-templating";
 export class PhdTagsInputCustomElement {
   @bindable placeholder = "New tag";
   @bindable tags = [];
-  @children(".field__tag") _$controls: HTMLElement[] = [];
+  @children(".tags-input__tag") _$controls: HTMLElement[] = [];
 
   _inputStyle: { [key: string]: string };
   _newTagValue: string;
@@ -18,7 +18,8 @@ export class PhdTagsInputCustomElement {
     this._fieldWidth = this._$field.offsetWidth;
 
     this._inputStyle = {
-      width: `${this._fieldWidth}px`
+      width: `100%`,
+      maxWidth: `100%`
     };
   }
 
@@ -60,9 +61,16 @@ export class PhdTagsInputCustomElement {
     };
 
     this._inputStyle = {
-      width: `${this._fieldWidth -
-        ($last.offsetWidth + $last.offsetLeft) -
-        60}px`
+      width: `${Math.round(
+        ((this._fieldWidth - ($last.offsetWidth + $last.offsetLeft)) /
+          this._fieldWidth) *
+          100
+      ) - 5}%`,
+      maxWidth: `${Math.round(
+        ((this._fieldWidth - ($last.offsetWidth + $last.offsetLeft)) /
+          this._fieldWidth) *
+          100
+      ) - 5}%`
     };
   }
 

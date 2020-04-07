@@ -1,9 +1,9 @@
 <template>
   <div
     ref="_$field"
-    class="tagsinput__field field is-grouped is-grouped-multiline input"
+    class="tags-input field is-grouped is-grouped-multiline input"
   >
-    <div class="control field__tag" repeat.for="t of tags">
+    <div class="control tags-input__tag" repeat.for="t of tags">
       <div class="tags has-addons">
         <span class="tag">
           ${t}
@@ -16,7 +16,7 @@
     </div>
     <slot>
       <input
-        class="tag__input"
+        class="tags-input__input"
         style.bind="_inputStyle"
         placeholder="${placeholder}"
         value.bind="_newTagValue"

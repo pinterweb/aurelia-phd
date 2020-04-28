@@ -54,7 +54,13 @@
         size.bind="itemPage.size"
         page-number.bind="itemPage.pageNumber"
         page-changed.delegate="itemPage.pageNumber=$event.detail.pageNumber"
-      ></phd-pager>
+      >
+        <phd-page-size-select
+          page-size-changed.delegate="itemPage.size=$event.detail.pageSize"
+          selected-size.bind="itemPage.size"
+          sizes.bind="[null, 10, 20, 30, 40, 50]"
+        ></phd-page-size-select>
+      </phd-pager>
     </div>
   </div>
 </template>

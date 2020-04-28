@@ -1,0 +1,9 @@
+<template>
+  <select
+    class="form-control"
+    value.bind="selectedSize"
+    change.delegate="_pageNumberChanged()"
+  >
+    <option repeat.for="size of sizes" model.bind="size">${size}</option>
+  </select>
+</template>

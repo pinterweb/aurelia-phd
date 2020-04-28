@@ -24,6 +24,7 @@ export function configure(
     PLATFORM.moduleName("./elements/phd-table"),
     PLATFORM.moduleName("./elements/phd-search-bar"),
     PLATFORM.moduleName("./elements/phd-pager"),
+    PLATFORM.moduleName("./elements/phd-page-size-select"),
     PLATFORM.moduleName("./elements/phd-tags-input"),
     PLATFORM.moduleName("./value-converters/phd-page-value-converter"),
     PLATFORM.moduleName("./value-converters/phd-sort-value-converter"),

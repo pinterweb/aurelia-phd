@@ -1,5 +1,6 @@
 <template>
   <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+    <slot></slot>
     <ul class="pagination-list">
       <li show.bind="shortened && pageNumber >= 5">
         <a click.delegate="pageNumber=0" class="pagination-link">1</a>

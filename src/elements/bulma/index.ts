@@ -5,4 +5,5 @@ export function configure(): void {
   PLATFORM.moduleName("./phd-search-bar.html");
   PLATFORM.moduleName("./phd-pager.html");
   PLATFORM.moduleName("./phd-tags-input.html");
+  PLATFORM.moduleName("./phd-page-size-select.html");
 }

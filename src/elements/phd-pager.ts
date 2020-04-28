@@ -9,6 +9,7 @@ type Page = import("../model").Page;
 export class PhdPagerCustomElement implements Page {
   static inject = [Element];
 
+  @bindable itemCount: number;
   @bindable items: PageItem[] = [];
   @bindable size = 3;
   @bindable pageNumber = 0;
@@ -17,16 +18,24 @@ export class PhdPagerCustomElement implements Page {
 
   pageBuffer: number[];
 
-  @computedFrom("items", "size")
+  @computedFrom("_itemCount", "size")
   get totalPages(): number {
-    return !this.items || !this.items.length || !this.size
+    return !this._itemCount || !this._size
       ? 0
-      : Math.ceil(this.items.length / this.size);
+      : Math.ceil(this._itemCount / this._size);
   }
 
   @computedFrom("totalPages")
   get shortened(): boolean {
     return this.totalPages > 10 ? true : false;
+  }
+
+  get _itemCount(): number {
+    return (this.items && this.items.length) || this.itemCount;
+  }
+
+  get _size(): number {
+    return this.size === null && this._itemCount ? this._itemCount : this.size;
   }
 
   attached(): void {
@@ -39,8 +48,13 @@ export class PhdPagerCustomElement implements Page {
     this.pageNumberChanged();
   }
 
+  itemCountChanged(): void {
+    this.pageNumber = 0;
+    this.pageNumberChanged();
+  }
+
   pageNumberChanged(): void {
-    if (!this.items) return;
+    if (!this._itemCount) return;
 
     if (this.shortened === true) {
       if (this.pageNumber > 4 && this.pageNumber < this.totalPages - 5) {
@@ -57,17 +71,21 @@ export class PhdPagerCustomElement implements Page {
       this.pageBuffer = this.range(0, this.totalPages);
     }
 
-    const startPage = this.pageNumber * this.size;
+    const startPage = this.pageNumber * this._size;
 
     this._$element.dispatchEvent(
       DOM.createCustomEvent("page-changed", {
         bubbles: true,
         detail: {
-          pageItems: this.items.slice(startPage, startPage + this.size),
+          pageItems: this.items.slice(startPage, startPage + this._size),
           pageNumber: this.pageNumber
         }
       })
     );
+  }
+
+  sizeChanged(): void {
+    this.pageNumberChanged();
   }
 
   range(start: number, end: number): number[] {

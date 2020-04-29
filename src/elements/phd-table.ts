@@ -178,10 +178,6 @@ export class PhdTableCustomElement<T> {
 
     const fnName = handler.substring(0, handler.indexOf("("));
 
-    const lastSelection = this._selectedRows.pop() || { highlight: null };
-    lastSelection.highlight = false;
-    this._selectedRows.push(args.row);
-
     // has external handler
     if (this._bindingContext[fnName]) {
       $event.stopPropagation();

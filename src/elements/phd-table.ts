@@ -192,16 +192,6 @@ export class PhdTableCustomElement<T> {
         return true;
       }
 
-      // ($event.target as HTMLElement).parentElement.dispatchEvent(
-      //   DOM.createCustomEvent("click", {
-      //     bubbles: true,
-      //     detail: {
-      //       $event,
-      //       ...args
-      //     }
-      //   })
-      // );
-
       target = target.parentNode;
     }
 

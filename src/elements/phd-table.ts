@@ -15,7 +15,7 @@ import {
 import { toTitleCase, getIn } from "../utils";
 
 type Disposable = import("aurelia-framework").Disposable;
-type TableOptions = import("../model").Options;
+type TableOptions<T> = import("../model").Options<T>;
 type Page = import("../model").Page;
 type Column = import("../model").Column;
 type Sort = import("../model").Sort;
@@ -27,6 +27,8 @@ type HeaderClickedArgs = import("../model").HeaderClickedArgs;
 
 interface PhdTableInstruction extends BehaviorInstruction {
   nestedTableFactory: ViewFactory;
+  nestedTableBodyFactory: ViewFactory;
+  factories: ViewFactory[];
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -40,14 +42,50 @@ type PropertyValue = any;
     $node: Element,
     instruction: BehaviorInstruction
   ): boolean => {
-    const $nestedTable = $node.firstElementChild;
+    const $nestedRows = [];
+    instruction["factories"] = [];
 
-    if ($nestedTable && $nestedTable.tagName === "PHD-TABLE") {
-      instruction["nestedTableFactory"] = compiler.compile(
-        `<template>${$node.innerHTML}</template>`,
+    for (let c = 0, len = $node.children.length; c < len; c++) {
+      // for (const $child of Array.from($node.children)) {
+      const $child = $node.children[c];
+      if ($child.tagName === "PHD-TABLE") {
+        instruction["nestedTableFactory"] = compiler.compile(
+          `<template>${$node.innerHTML}</template>`,
+          resources
+        );
+        $node.removeChild($child);
+      } else if ($child.tagName === "PHD-ROW") {
+        const $cells = $child.querySelectorAll("PHD-CELL");
+        const $tr = DOM.createElement("tr");
+
+        for (const $cell of Array.from($cells)) {
+          const $td = DOM.createElement("td");
+
+          if ($cell.hasAttributes()) {
+            for (let i = $cell.attributes.length - 1; i >= 0; i--) {
+              $td.setAttribute(
+                $cell.attributes[i].name,
+                $cell.attributes[i].value
+              );
+            }
+          }
+
+          $td.innerHTML = $cell.innerHTML;
+          $child.replaceChild($td, $cell);
+        }
+
+        $nestedRows.push($node.replaceChild($tr, $child));
+      }
+    }
+
+    if ($nestedRows.length) {
+      instruction["nestedTableBodyFactory"] = compiler.compile(
+        `<template>${$nestedRows.map($n => $n.innerHTML).join("")}</template>`,
         resources
       );
+    }
 
+    if ($node.children.length) {
       while ($node.firstElementChild) {
         $node.removeChild($node.firstElementChild);
       }
@@ -67,14 +105,23 @@ export class PhdTableCustomElement<T> {
 
   @bindable columns: Column[] = [];
   @bindable items: T[];
-  @bindable options: TableOptions;
+  @bindable options: TableOptions<T> = {};
   @bindable page: Page;
   @bindable selectedItems: T[];
 
-  _$nestedTableCell: HTMLTableCellElement;
-  _$nestedTableRow: HTMLTableRowElement;
-  _nestedTableSlot: ViewSlot;
-  _nestedTableView: View;
+  _nestedTable: {
+    $cell: HTMLTableCellElement;
+    $row: HTMLTableRowElement;
+    slot: ViewSlot;
+    view: View;
+  };
+
+  _nestedTableBody: {
+    $body: HTMLTableElement;
+    slot: ViewSlot;
+    view: View;
+  };
+
   _columns: Column[] = [];
   _bindingContext: BindingContext;
   _sorts: Sort[];
@@ -83,6 +130,8 @@ export class PhdTableCustomElement<T> {
     selected: false
   };
   _subscription: Disposable;
+
+  _selectedRows: RowData<T>[] = [];
 
   constructor(
     private _$element: Element,
@@ -95,18 +144,40 @@ export class PhdTableCustomElement<T> {
   bind(bindingContext: BindingContext): void {
     this._bindingContext = bindingContext;
 
-    const nestedTableViewFactory = (this._instruction
-      .elementInstruction as PhdTableInstruction).nestedTableFactory;
+    const slotInstruction = this._instruction
+      .elementInstruction as PhdTableInstruction;
 
-    if (nestedTableViewFactory) {
-      this._nestedTableView = nestedTableViewFactory.create(
-        this._container,
-        bindingContext
+    if (slotInstruction.nestedTableFactory) {
+      this._nestedTable = {
+        view: slotInstruction.nestedTableFactory.create(
+          this._container,
+          bindingContext
+        ),
+        $cell: DOM.createElement("td") as HTMLTableCellElement,
+        $row: DOM.createElement("tr") as HTMLTableRowElement,
+        slot: null
+      };
+
+      this._nestedTable.$row.appendChild(this._nestedTable.$cell);
+    }
+
+    if (slotInstruction.nestedTableBodyFactory) {
+      this._nestedTableBody = {
+        view: slotInstruction.nestedTableBodyFactory.create(
+          this._container,
+          bindingContext
+        ),
+        $body: DOM.createElement("tbody") as HTMLTableElement,
+        slot: null
+      };
+
+      this._nestedTableBody.slot = new ViewSlot(
+        this._nestedTableBody.$body,
+        true
       );
-
-      this._$nestedTableRow = DOM.createElement("tr") as HTMLTableRowElement;
-      this._$nestedTableCell = DOM.createElement("td") as HTMLTableCellElement;
-      this._$nestedTableRow.appendChild(this._$nestedTableCell);
+      this._nestedTableBody.slot.add(this._nestedTableBody.view);
+      this._nestedTableBody.slot.bind(this._bindingContext, null);
+      this._addTableBodyFromSlot(this._nestedTableBody.$body);
     }
 
     if (this.columns) this.columnsChanged();
@@ -119,20 +190,40 @@ export class PhdTableCustomElement<T> {
     }
   }
 
+  attached(): void {
+    if (this._nestedTableBody && this._nestedTableBody.slot) {
+      this._nestedTableBody.slot.attached();
+    }
+  }
+
   detached(): void {
-    if (this._nestedTableSlot) {
-      this._nestedTableSlot.unbind();
-      this._nestedTableSlot.detached();
-      this._nestedTableSlot.removeAll();
+    if (this._nestedTable && this._nestedTable.slot) {
+      this._nestedTable.slot.detached();
+      this._nestedTable.slot.removeAll();
+    }
+
+    if (this._nestedTableBody && this._nestedTableBody.slot) {
+      this._nestedTableBody.slot.detached();
+      this._nestedTableBody.slot.removeAll();
     }
   }
 
   unbind(): void {
-    if (this._subscription) this._subscription.dispose();
+    if (this._subscription) {
+      this._subscription.dispose();
+    }
+
+    if (this._nestedTable && this._nestedTable.slot) {
+      this._nestedTable.slot.unbind();
+    }
+
+    if (this._nestedTableBody && this._nestedTableBody.slot) {
+      this._nestedTableBody.slot.unbind();
+    }
   }
 
   optionsChanged(): void {
-    if (this._nestedTableView) {
+    if (this._nestedTable) {
       this._columns.unshift({
         style: { width: "0px" },
         className: "table__cell--clickable",
@@ -146,7 +237,9 @@ export class PhdTableCustomElement<T> {
   itemsChanged(): void {
     this._rows = this.items.map(item => ({
       item,
-      expanded: false
+      expanded: false,
+      highlight: false,
+      ...this.options.row
     }));
 
     this._headerRow.selected = false;
@@ -177,10 +270,6 @@ export class PhdTableCustomElement<T> {
       "";
 
     const fnName = handler.substring(0, handler.indexOf("("));
-
-    const lastSelection = this._selectedRows.pop() || { highlight: null };
-    lastSelection.highlight = false;
-    this._selectedRows.push(args.row);
 
     // has external handler
     if (this._bindingContext[fnName]) {
@@ -236,6 +325,20 @@ export class PhdTableCustomElement<T> {
     }
 
     this._sort();
+
+    this._$element.dispatchEvent(
+      DOM.createCustomEvent("phd-table-sorted", {
+        bubbles: true,
+        detail: {
+          ...args,
+          // see bug #28, reverse order is actually ascending
+          sortedColumns: sortableColumns
+            .concat([args.column])
+            .filter(c => c.sort.direction)
+            .sort((a, b) => b.sort.order - a.sort.order)
+        }
+      })
+    );
   }
 
   _getFieldData<T>(item: T, column: Column): string {
@@ -284,16 +387,16 @@ export class PhdTableCustomElement<T> {
 
     if (row.expanded) {
       const $element = $event.target as Element;
-      this._$nestedTableCell.colSpan = this._columns.length;
+      this._nestedTable.$cell.colSpan = this._columns.length;
       $element
         .closest("tr")
-        .insertAdjacentElement("afterend", this._$nestedTableRow);
+        .insertAdjacentElement("afterend", this._nestedTable.$row);
 
-      this._nestedTableSlot = new ViewSlot(this._$nestedTableCell, true);
+      this._nestedTable.slot = new ViewSlot(this._nestedTable.$cell, true);
 
-      this._nestedTableSlot.add(this._nestedTableView);
-      this._nestedTableSlot.bind(this._bindingContext, null);
-      this._nestedTableSlot.attached();
+      this._nestedTable.slot.add(this._nestedTable.view);
+      this._nestedTable.slot.bind(this._bindingContext, null);
+      this._nestedTable.slot.attached();
     }
 
     $event.stopPropagation();
@@ -311,16 +414,28 @@ export class PhdTableCustomElement<T> {
   }
 
   _closeDetailRow<T>(row?: RowData<T>): void {
-    if (this._nestedTableSlot) {
-      this._nestedTableSlot.unbind();
-      this._nestedTableSlot.detached();
-      this._nestedTableSlot.removeAll();
-      this._nestedTableSlot = null;
-      this._$nestedTableRow.parentElement.removeChild(this._$nestedTableRow);
+    if (this._nestedTable && this._nestedTable.slot) {
+      this._nestedTable.slot.unbind();
+      this._nestedTable.slot.detached();
+      this._nestedTable.slot.removeAll();
+      this._nestedTable.slot = null;
+      this._nestedTable.$row.parentElement.removeChild(this._nestedTable.$row);
     }
 
     const _row = row || this._rows.find(i => i.expanded);
 
     if (_row) _row.expanded = !_row.expanded;
+  }
+
+  _addTableBodyFromSlot($body: HTMLTableElement): void {
+    const $mainBody = this._$element.querySelector("tbody");
+    const $table = this._$element.querySelector("table");
+
+    $table.insertBefore($body, $mainBody);
+    // this._nestedTableBody.slot = new ViewSlot($table, true);
+
+    // this._nestedTableBody.slot.add(this._nestedTableBody.view);
+    // this._nestedTableBody.slot.bind(this._bindingContext, null);
+    // this._nestedTableBody.slot.attached();
   }
 }

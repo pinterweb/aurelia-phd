@@ -170,37 +170,42 @@ export class PhdTableCustomElement<T> {
   }
 
   _cellClicked($event: MouseEvent, args: CellClickedArgs<T>): boolean {
-    const handler =
-      ($event.target as Element).getAttribute("click.delegate") ||
-      ($event.target as Element).getAttribute("click.trigger") ||
-      ($event.target as Element).getAttribute("click.capture") ||
-      "";
+    let target = $event.target as any;
 
-    const fnName = handler.substring(0, handler.indexOf("("));
+    while (target) {
+      const handler =
+        target.getAttribute("click.delegate") ||
+        target.getAttribute("click.trigger") ||
+        target.getAttribute("click.capture") ||
+        "";
 
-    // has external handler
-    if (this._bindingContext[fnName]) {
-      $event.stopPropagation();
+      const fnName = handler.substring(0, handler.indexOf("("));
 
-      this._bindingContext[fnName].call(this._bindingContext, args);
+      // has external handler
+      if (this._bindingContext[fnName]) {
+        $event.stopPropagation();
 
-      return false;
-    } else if (handler || (event.target as Element).tagName === "A") {
-      return true;
+        this._bindingContext[fnName].call(this._bindingContext, args);
+
+        return false;
+      } else if (handler || (event.target as Element).tagName === "A") {
+        return true;
+      }
+
+      // ($event.target as HTMLElement).parentElement.dispatchEvent(
+      //   DOM.createCustomEvent("click", {
+      //     bubbles: true,
+      //     detail: {
+      //       $event,
+      //       ...args
+      //     }
+      //   })
+      // );
+
+      target = target.parentNode;
     }
 
     $event.stopPropagation();
-
-    ($event.target as HTMLElement).parentElement.dispatchEvent(
-      DOM.createCustomEvent("click", {
-        bubbles: true,
-        detail: {
-          $event,
-          ...args
-        }
-      })
-    );
-
     return false;
   }
 

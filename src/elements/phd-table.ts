@@ -169,20 +169,43 @@ export class PhdTableCustomElement<T> {
     this._sort();
   }
 
-  _cellClicked<T>($event: MouseEvent, args: CellClickedArgs<T>): boolean {
-    let fnName =
-      ($event.target as Element).getAttribute("click.delegate") || "";
+  _cellClicked($event: MouseEvent, args: CellClickedArgs<T>): boolean {
+    const handler =
+      ($event.target as Element).getAttribute("click.delegate") ||
+      ($event.target as Element).getAttribute("click.trigger") ||
+      ($event.target as Element).getAttribute("click.capture") ||
+      "";
 
-    fnName = fnName.substring(0, fnName.indexOf("("));
+    const fnName = handler.substring(0, handler.indexOf("("));
+
+    const lastSelection = this._selectedRows.pop() || { highlight: null };
+    lastSelection.highlight = false;
+    this._selectedRows.push(args.row);
 
     // has external handler
     if (this._bindingContext[fnName]) {
       $event.stopPropagation();
+
       this._bindingContext[fnName].call(this._bindingContext, args);
+
       return false;
+    } else if (handler || (event.target as Element).tagName === "A") {
+      return true;
     }
 
-    return true;
+    $event.stopPropagation();
+
+    ($event.target as HTMLElement).parentElement.dispatchEvent(
+      DOM.createCustomEvent("click", {
+        bubbles: true,
+        detail: {
+          $event,
+          ...args
+        }
+      })
+    );
+
+    return false;
   }
 
   _headerClicked(args: HeaderClickedArgs): void {

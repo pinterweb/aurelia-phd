@@ -169,20 +169,34 @@ export class PhdTableCustomElement<T> {
     this._sort();
   }
 
-  _cellClicked<T>($event: MouseEvent, args: CellClickedArgs<T>): boolean {
-    let fnName =
-      ($event.target as Element).getAttribute("click.delegate") || "";
+  _cellClicked($event: MouseEvent, args: CellClickedArgs<T>): boolean {
+    let target = $event.target as any;
 
-    fnName = fnName.substring(0, fnName.indexOf("("));
+    while (target) {
+      const handler =
+        target.getAttribute("click.delegate") ||
+        target.getAttribute("click.trigger") ||
+        target.getAttribute("click.capture") ||
+        "";
 
-    // has external handler
-    if (this._bindingContext[fnName]) {
-      $event.stopPropagation();
-      this._bindingContext[fnName].call(this._bindingContext, args);
-      return false;
+      const fnName = handler.substring(0, handler.indexOf("("));
+
+      // has external handler
+      if (this._bindingContext[fnName]) {
+        $event.stopPropagation();
+
+        this._bindingContext[fnName].call(this._bindingContext, args);
+
+        return false;
+      } else if (handler || (event.target as Element).tagName === "A") {
+        return true;
+      }
+
+      target = target.parentNode;
     }
 
-    return true;
+    $event.stopPropagation();
+    return false;
   }
 
   _headerClicked(args: HeaderClickedArgs): void {

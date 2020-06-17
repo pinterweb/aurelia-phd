@@ -9,6 +9,7 @@ import * as framework from "./elements/index";
 
 export * from "./model";
 export { FilterEventDetail, Filter } from "./elements/phd-search-bar";
+export { Model as NavbarModel } from "./elements/phd-navbar";
 
 interface PluginOptions {
   framework: string;

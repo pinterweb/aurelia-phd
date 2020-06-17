@@ -13,8 +13,14 @@ export interface Navigation {
   title: string;
 }
 
+export interface Model {
+  navbarModifiers: string[];
+  brand: Partial<Brand>;
+  navigation: Partial<Navigation>[];
+}
+
 @autoinject
-export class PhdNavbarCustomElement {
+export class PhdNavbarCustomElement implements Model {
   $navbarMain: Element;
   @bindable brand: Partial<Brand>;
   @bindable navigation: Partial<Navigation>[];

@@ -33,8 +33,8 @@ export class PhdNavbarCustomElement implements Model {
     this._navbarModifiers = this.navbarModifiers.join(" ");
   }
 
-  collapse(): boolean {
-    this.$navbarMain.classList.toggle("is-active");
+  collapse(classToToggle: string): boolean {
+    this.$navbarMain.classList.toggle(classToToggle);
 
     return true;
   }

@@ -1,5 +1,6 @@
 import { inject } from "aurelia-framework";
 import { Filter, Column, Header } from "resources";
+import { PLATFORM } from "aurelia-framework";
 
 interface ExtendedColumn extends Column {
   [x: string]: any;
@@ -10,6 +11,40 @@ const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 @inject("defaultOptions")
 export class App {
   allItems = [];
+
+  _currentFramework;
+  _frameworks = {
+    bulma: {
+      navbar: {
+        navbarModifiers: ["is-light"],
+        brand: {
+          url: "https://bulma.io",
+          title: "Bulma PHD"
+        },
+        navigation: [
+          {
+            href: "?framework=bootstrap3",
+            title: "Bootstrap3"
+          }
+        ]
+      }
+    },
+    bootstrap3: {
+      navbar: {
+        navbarModifiers: ["navbar-default", "navbar-fixed-top"],
+        brand: {
+          url: "https://getbootstrap.com/docs/3.4/",
+          title: "Bootstrap3 PHD"
+        },
+        navigation: [
+          {
+            href: "?framework=bulma",
+            title: "Bulma"
+          }
+        ]
+      }
+    }
+  };
 
   itemPage = {
     size: 10,
@@ -84,13 +119,13 @@ export class App {
         author: { firstName: authors[randomAuthor] }
       };
     }
-  }
 
-  changeFramework(framework: string): void {
-    this._options.framework = framework;
-    window.location.replace(
-      window.location.origin + "?framework=" + encodeURIComponent(framework)
-    );
+    const params = new URL(PLATFORM.location.href).searchParams;
+    const framework = params.get("framework");
+
+    this._currentFramework = this._frameworks[
+      framework || this._options.framework
+    ];
   }
 
   getViewStrategy(): string {

@@ -1,40 +1,11 @@
 <template>
   <require from="bulma/css/bulma.css"></require>
 
-  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <a class="navbar-item" href="https://bulma.io">
-        Aurelia PHD
-      </a>
-
-      <a
-        role="button"
-        class="navbar-burger burger"
-        aria-label="menu"
-        aria-expanded="false"
-        data-target="navbarBasicExample"
-      >
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </a>
-    </div>
-
-    <div id="navbarBasicExample" class="navbar-menu">
-      <div class="navbar-start">
-        <a
-          href="#"
-          click.delegate="changeFramework('bootstrap3')"
-          class="navbar-item"
-        >
-          Bootstrap 3
-        </a>
-        <a class="navbar-item is-active">
-          Bulma
-        </a>
-      </div>
-    </div>
-  </nav>
+  <phd-navbar brand.bind="_currentFramework.navbar.brand",
+              navigation.bind="_currentFramework.navbar.navigation"
+              navbar-modifiers.bind="_currentFramework.navbar.navbarModifiers"
+              >
+  </phd-navbar>
 
   <div class="container">
     <div>

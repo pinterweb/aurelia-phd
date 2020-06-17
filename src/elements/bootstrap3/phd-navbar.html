@@ -1,0 +1,40 @@
+<template>
+  <nav
+    class="navbar ${_navbarModifiers}"
+    role="navigation"
+    aria-label="main navigation"
+  >
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button
+          type="button"
+          class="navbar-toggle collapsed"
+          data-toggle="collapse"
+          aria-expanded="false"
+          aria-label="menu"
+          click.delegate="collapse()"
+        >
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="${brand.url}">
+          <img alt="Brand" src="${brand.image}" show.bind="brand.image" />
+          ${brand.title}
+        </a>
+      </div>
+
+      <div class="collapse navbar-collapse" ref="$navbarMain">
+        <ul class="nav navbar-nav">
+          <li
+            repeat.for="route of navigation"
+            class="${route.isActive ? 'active' : ''}"
+          >
+            <a href="${route.href}">${route.title}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</template>

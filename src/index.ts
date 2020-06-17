@@ -25,6 +25,7 @@ export function configure(
     PLATFORM.moduleName("./elements/phd-search-bar"),
     PLATFORM.moduleName("./elements/phd-pager"),
     PLATFORM.moduleName("./elements/phd-tags-input"),
+    PLATFORM.moduleName("./elements/phd-navbar"),
     PLATFORM.moduleName("./value-converters/phd-page-value-converter"),
     PLATFORM.moduleName("./value-converters/phd-sort-value-converter"),
     PLATFORM.moduleName("./attributes/enhance-html")

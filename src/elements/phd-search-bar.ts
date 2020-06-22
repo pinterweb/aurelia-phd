@@ -1,4 +1,4 @@
-import { bindable } from "aurelia-framework";
+import { bindable, computedFrom } from "aurelia-framework";
 import { DOM } from "aurelia-pal";
 import { getIn } from "../utils";
 
@@ -65,6 +65,17 @@ export class PhdSearchBarCustomElement {
   _tags: string[] = [];
 
   constructor(private _$element: Element) {}
+
+  @computedFrom(
+    "_$element.au.controller.view.slots['__au-default-slot-key__'].children.length"
+  )
+  get _showCaretToSearchForm(): boolean {
+    return (
+      (this._$element as any).au.controller.view.slots[
+        "__au-default-slot-key__"
+      ].children.length > 0
+    );
+  }
 
   attached(): void {
     this.filterChanged();

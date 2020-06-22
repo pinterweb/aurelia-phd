@@ -60,6 +60,7 @@ export class PhdSearchBarCustomElement {
   @bindable filter: Filter[] | string;
   @bindable method: FilterMethod;
 
+  _searching = false;
   _filters: ExtendedFilter[] = [];
   _tags: string[] = [];
 
@@ -85,6 +86,8 @@ export class PhdSearchBarCustomElement {
       this._filters = [...this.filter.map(f => ({ ...f, tags: [] }))];
       this._handleSubmit();
     }
+
+    this._searching = false;
   }
 
   _tagAdded(term: string): void {

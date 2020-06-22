@@ -24,6 +24,7 @@
           >
         </span>
         <span
+          show.bind="_showCaretToSearchForm"
           click.trigger="_searching=!_searching"
           style="pointer-events: initial"
           class="input__icon--clickable icon is-small is-right"
@@ -37,8 +38,8 @@
     </div>
   </form>
   <div show.bind="_searching" class="form__overlay_wrapper">
-    <form class="form__overlay">
+    <div class="form__overlay">
       <slot> </slot>
-    </form>
+    </div>
   </div>
 </template>

@@ -16,6 +16,7 @@
           tags.bind="_tags"
         ></phd-tags-input>
         <span
+          show.bind="_showCaretToSearchForm"
           click.trigger="_searching=!_searching"
           class="input__icon--clickable input-group-addon"
         >
@@ -28,8 +29,8 @@
     </div>
   </form>
   <div show.bind="_searching" class="form__overlay_wrapper">
-    <form class="form__overlay">
+    <div class="form__overlay">
       <slot> </slot>
-    </form>
+    </div>
   </div>
 </template>

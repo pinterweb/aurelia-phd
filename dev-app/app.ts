@@ -33,7 +33,7 @@ export class App {
     },
     bootstrap3: {
       navbar: {
-        navbarModifiers: ["navbar-default", "navbar-fixed-top"],
+        navbarModifiers: ["navbar-default"],
         brand: {
           url: "https://getbootstrap.com/docs/3.4/",
           title: "Bootstrap3 PHD"

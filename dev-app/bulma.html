@@ -65,10 +65,7 @@
 
         <div class="field is-grouped">
           <div class="control">
-            <button
-              class="button is-link"
-              click.delegate="_resetFilter()"
-            >
+            <button class="button is-link" click.delegate="_resetFilter()">
               Submit
             </button>
           </div>
@@ -78,6 +75,7 @@
         items.bind="_filteredItems"
         columns.bind="_itemColumns"
         page.bind="itemPage"
+        phd-table-row-clicked.delegate="rowClicked($event.detail)"
       >
       </phd-table>
       <phd-pager

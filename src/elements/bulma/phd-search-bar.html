@@ -1,4 +1,5 @@
 <template class="phd-search-bar--bulma">
+  <require from="../phd-search-bar.css"></require>
   <require from="./phd-search-bar.css"></require>
 
   <form submit.delegate="_handleSubmit($event)">
@@ -22,10 +23,23 @@
             >&#215;</span
           >
         </span>
+        <span
+          show.bind="_showCaretToSearchForm"
+          click.trigger="_searching=!_searching"
+          style="pointer-events: initial"
+          class="input__icon--clickable icon is-small is-right"
+        >
+          &or;
+        </span>
       </div>
       <p class="control">
         <button type="submit" class="button is-primary">Search</button>
       </p>
     </div>
   </form>
+  <div show.bind="_searching" class="form__overlay_wrapper">
+    <div class="form__overlay">
+      <slot> </slot>
+    </div>
+  </div>
 </template>

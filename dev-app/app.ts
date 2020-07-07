@@ -11,6 +11,8 @@ const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 @inject("defaultOptions")
 export class App {
   allItems = [];
+  _authors = authors;
+  _searchForm = {};
 
   _currentFramework;
   _frameworks = {
@@ -31,7 +33,7 @@ export class App {
     },
     bootstrap3: {
       navbar: {
-        navbarModifiers: ["navbar-default", "navbar-fixed-top"],
+        navbarModifiers: ["navbar-default"],
         brand: {
           url: "https://getbootstrap.com/docs/3.4/",
           title: "Bootstrap3 PHD"
@@ -88,16 +90,7 @@ export class App {
   ];
 
   constructor(private _options) {
-    this._searchFilter = this._itemColumns.map<Filter>(i => {
-      const fields = Array.isArray(i.field) ? i.field : [i.field];
-      const header = i.header && ((i.header as Header).name || i.header);
-
-      return {
-        fields,
-        display: header || (!Array.isArray(i.field) ? i.field : i.field[0]),
-        values: i.filter || []
-      } as Filter;
-    });
+    this._resetFilter();
   }
 
   activate(): void {
@@ -130,5 +123,42 @@ export class App {
 
   getViewStrategy(): string {
     return "./" + this._options.framework + ".html";
+  }
+
+  _resetFilter(): void {
+    this._searchFilter = this._itemColumns.map<Filter>(i => {
+      const fields = Array.isArray(i.field) ? i.field : [i.field];
+      const header: string =
+        i.header && ((i.header as Header).name || (i.header as string));
+      const display =
+        header || (!Array.isArray(i.field) ? i.field : i.field[0]);
+
+      return {
+        fields,
+        display,
+        values: (this._searchForm[display] === null
+          ? []
+          : this._searchForm[display] || i.filter || i.values || []
+        ).filter(v => v)
+      } as Filter;
+    });
+
+    this._searchForm = this._searchFilter.reduce((accu, curr) => {
+      accu[curr.display] = curr.values;
+
+      return accu;
+    }, {});
+  }
+}
+
+export class NumberValueConverter {
+  toView(value: number): string {
+    return value === null || typeof value === "undefined"
+      ? null
+      : value.toString();
+  }
+
+  fromView(value: string): number {
+    return value === "" ? null : Number(value);
   }
 }

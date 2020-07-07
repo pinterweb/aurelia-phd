@@ -1,0 +1,14 @@
+.form__overlay_wrapper {
+  position: relative;
+  padding: 0;
+}
+
+.form__overlay {
+  position: absolute;
+  width: 100%;
+  z-index: 2;
+  background-color: white;
+  display: block;
+  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  padding: 24px;
+}

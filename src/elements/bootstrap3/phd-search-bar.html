@@ -1,6 +1,9 @@
-<template>
+<template class="phd-search-bar--bootstrap3">
+  <require from="./phd-search-bar.css"></require>
+  <require from="../phd-search-bar.css"></require>
+
   <form submit.delegate="_handleSubmit($event)">
-    <div class="form-group">
+    <div class="phd-search-bar__form-group form-group">
       <div class="input-group">
         <span click.trigger="clear()" class="input-group-addon">
           <span show.bind="!searchTerm">&#128269;</span>
@@ -12,10 +15,22 @@
           change.delegate="_tagAdded($event.target.value)"
           tags.bind="_tags"
         ></phd-tags-input>
+        <span
+          show.bind="_showCaretToSearchForm"
+          click.trigger="_searching=!_searching"
+          class="input__icon--clickable input-group-addon"
+        >
+          &or;
+        </span>
         <span class="input-group-btn">
           <button class="btn btn-primary" type="submit">Search</button>
         </span>
       </div>
     </div>
   </form>
+  <div show.bind="_searching" class="form__overlay_wrapper">
+    <div class="form__overlay">
+      <slot> </slot>
+    </div>
+  </div>
 </template>

@@ -14,7 +14,54 @@
         filter.bind="_searchFilter"
         items.bind="allItems"
         filtered.delegate="_filteredItems=$event.detail.filteredItems"
-      ></phd-search-bar>
+      >
+        <div class="form-group">
+          <label>Title</label>
+          <input
+            class="form-control"
+            type="text"
+            placeholder="Title"
+            value.bind="_searchForm.title[0]"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Duration</label>
+          <input
+            class="form-control"
+            type="number"
+            placeholder="Duration"
+            value.bind="_searchForm.duration[0] | number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>% Complete</label>
+          <input
+            class="form-control"
+            type="number"
+            placeholder="% Complete"
+            value.bind="_searchForm['% Complete'][0] | number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Author</label>
+          <select
+            multiple
+            size="4"
+            class="form-control"
+            value.bind="_searchForm.Author"
+          >
+            <option value="">Choose</option>
+            <option value.bind="a" repeat.for="a of _authors">${a}</option>
+          </select>
+        </div>
+
+        <button class="button is-link" click.delegate="_resetFilter()">
+          Submit
+        </button>
+      </phd-search-bar>
       <phd-table
         items.bind="_filteredItems"
         columns.bind="_itemColumns"

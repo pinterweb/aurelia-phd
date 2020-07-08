@@ -79,7 +79,7 @@ export class PhdTableCustomElement<T> {
   /**
    * @deprecated use selected property on row object
    */
-  @bindable selectedItems: T[] = [];
+  @bindable selectedItems: T[];
   @bindable rows: RowData<T>[];
 
   _$nestedTableCell: HTMLTableCellElement;
@@ -206,6 +206,8 @@ export class PhdTableCustomElement<T> {
         "selected items is deprecated. use the selected property on the row"
       );
     }
+
+    this.selectedItems = this.selectedItems || [];
   }
 
   _cellClicked($event: MouseEvent, args: CellClickedArgs<T>): boolean {
@@ -353,7 +355,9 @@ export class PhdTableCustomElement<T> {
         bubbles: true,
         detail: {
           $event,
-          selection: rows.map(row => ({ row, column: null }))
+          selection: rows
+            .filter(r => r.selected)
+            .map(row => ({ row, column: null }))
         }
       })
     );

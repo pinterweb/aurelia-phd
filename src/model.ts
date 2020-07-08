@@ -2,7 +2,8 @@ export type SortDirection = "asc" | "desc" | "";
 
 export interface RowData<T> {
   item: T;
-  expanded: boolean;
+  expanded?: boolean;
+  selected?: boolean;
 }
 
 export interface Header {
@@ -35,12 +36,25 @@ export interface Column {
   className?: string;
 }
 
+export interface SelectionOption {
+  highlightOnSelect: boolean;
+}
+
 export interface Options {
+  /**
+   * @deprecated use selection property instead
+   */
   selectable?: boolean;
+  selection?: boolean | Partial<SelectionOption>;
 }
 
 export interface CellClickedArgs<T> {
   row: RowData<T>;
+}
+
+export interface RowEvent<T> {
+  row: RowData<T>;
+  column: Column;
 }
 
 export interface HeaderClickedArgs {

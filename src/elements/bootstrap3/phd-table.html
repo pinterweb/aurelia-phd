@@ -6,10 +6,10 @@
   <table class="table table-hoverable">
     <thead>
       <tr>
-        <th width="0px" show.bind="options.selectable">
+        <th width="0px" show.bind="options.selection">
           <header-selector
             row.bind="_headerRow"
-            click.delegate="_selectAllRows()"
+            change.delegate="_selectAllRows($event)"
           ></header-selector>
         </th>
         <th repeat.for="column of _columns">
@@ -25,12 +25,14 @@
     </thead>
     <tbody>
       <tr
-        repeat.for="row of _rows | phdSort:_sorts | phdPage:page.size:page.pageNumber"
+        repeat.for="row of rows | phdSort:_sorts | phdPage:page.size:page.pageNumber"
+        class="${options.selection.highlightOnSelect && row.selected ? 'active' : ''}"
       >
-        <td show.bind="options.selectable">
+        <td show.bind="options.selection">
           <cell-selector
-            row.bind="{ index: $index, selected: selectedItems }"
-            item.bind="row.item"
+            row.bind="row"
+            index.bind="$index"
+            change.delegate="_rowSelectionChanged($event, [ row ], row.selected)"
           ></cell-selector>
         </td>
         <td
@@ -48,7 +50,7 @@
       </tr>
     </tbody>
   </table>
-  <div show.bind="!items.length">
+  <div show.bind="!rows.length">
     <no-items-area></no-items-area>
   </div>
 </template>

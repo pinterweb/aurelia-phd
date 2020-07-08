@@ -13,7 +13,7 @@
       <phd-search-bar
         filter.bind="_searchFilter"
         items.bind="allItems"
-        filtered.delegate="_filteredItems=$event.detail.filteredItems"
+        filtered.delegate="_filterRows($event.detail.filteredItems)"
       >
         <div class="field">
           <label class="label">Title</label>
@@ -72,9 +72,10 @@
         </div>
       </phd-search-bar>
       <phd-table
-        items.bind="_filteredItems"
+        rows.bind="rows"
         columns.bind="_itemColumns"
         page.bind="itemPage"
+        options.bind="_tableOptions"
       >
       </phd-table>
       <phd-pager

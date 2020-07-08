@@ -10,7 +10,8 @@ import {
   ViewCompiler,
   ViewFactory,
   ViewResources,
-  ViewSlot
+  ViewSlot,
+  LogManager
 } from "aurelia-framework";
 import { toTitleCase, getIn } from "../utils";
 
@@ -23,6 +24,7 @@ type SortDirection = import("../model").SortDirection;
 type RowData<T> = import("../model").RowData<T>;
 type BindingContext = Record<string, PropertyValue>;
 type CellClickedArgs<T> = import("../model").CellClickedArgs<T>;
+type RowEvent<T> = import("../model").RowEvent<T>;
 type HeaderClickedArgs = import("../model").HeaderClickedArgs;
 
 interface PhdTableInstruction extends BehaviorInstruction {
@@ -32,6 +34,8 @@ interface PhdTableInstruction extends BehaviorInstruction {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type PropertyValue = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+const logger = LogManager.getLogger("aurelia-phd");
 
 @processContent(
   (
@@ -66,10 +70,17 @@ export class PhdTableCustomElement<T> {
   ];
 
   @bindable columns: Column[] = [];
+  /**
+   * @deprecated use rows instead
+   */
   @bindable items: T[];
   @bindable options: TableOptions;
   @bindable page: Page;
-  @bindable selectedItems: T[];
+  /**
+   * @deprecated use selected property on row object
+   */
+  @bindable selectedItems: T[] = [];
+  @bindable rows: RowData<T>[];
 
   _$nestedTableCell: HTMLTableCellElement;
   _$nestedTableRow: HTMLTableRowElement;
@@ -78,7 +89,6 @@ export class PhdTableCustomElement<T> {
   _columns: Column[] = [];
   _bindingContext: BindingContext;
   _sorts: Sort[];
-  _rows: RowData<T>[];
   _headerRow = {
     selected: false
   };
@@ -111,6 +121,8 @@ export class PhdTableCustomElement<T> {
 
     if (this.columns) this.columnsChanged();
     if (this.items) this.itemsChanged();
+    if (this.rows) this.rowsChanged();
+    if (this.selectedItems) this.selectedItemsChanged();
 
     if (this.page) {
       this._subscription = this._bindingEngine
@@ -141,17 +153,36 @@ export class PhdTableCustomElement<T> {
           <span show.bind="row.expanded" click.trigger="_masterRowClicked($event, row)">&or;</span>`
       });
     }
+
+    if (this.options.selectable && !this.options.selection) {
+      logger.warn(
+        "options.selectable is deprecated. Used options.selection instead."
+      );
+      this.options.selection = true;
+    }
   }
 
+  /**
+   * @deprecated use rowsChanged instead
+   */
   itemsChanged(): void {
-    this._rows = this.items.map(item => ({
+    logger.warn(
+      "the bindable items property is deprecated. Use the rows property instead."
+    );
+
+    this.rows = this.items.map(item => ({
       item,
-      expanded: false
+      expanded: false,
+      selected: this.selectedItems && this.selectedItems.indexOf(item) !== -1
     }));
 
     this._headerRow.selected = false;
 
     this._closeDetailRow();
+  }
+
+  rowsChanged(): void {
+    this._updateHeaderRow();
   }
 
   columnsChanged(): void {
@@ -167,6 +198,14 @@ export class PhdTableCustomElement<T> {
 
     this.optionsChanged();
     this._sort();
+  }
+
+  selectedItemsChanged(): void {
+    if (this.selectedItems) {
+      logger.warn(
+        "selected items is deprecated. use the selected property on the row"
+      );
+    }
   }
 
   _cellClicked($event: MouseEvent, args: CellClickedArgs<T>): boolean {
@@ -243,20 +282,13 @@ export class PhdTableCustomElement<T> {
       : item[column.field];
   }
 
-  _selectAllRows(): boolean {
-    if (this._headerRow.selected) {
-      this.selectedItems.splice(0, this.selectedItems.length);
-    } else {
-      this._rows.forEach(item => {
-        const itemIndex = this.selectedItems.indexOf(item.item);
+  _selectAllRows($event: MouseEvent): boolean {
+    const allSelected = this.rows.every(row => row.selected);
+    this.rows.forEach(row => (row.selected = !allSelected));
 
-        if (itemIndex === -1) {
-          this.selectedItems.push(item.item);
-        }
-      });
-    }
+    this.rows.forEach(row => this._updatedSelectedItems(row));
 
-    return true;
+    return this._rowSelectionChanged($event, this.rows);
   }
 
   _sort(): void {
@@ -310,8 +342,44 @@ export class PhdTableCustomElement<T> {
       this._$nestedTableRow.parentElement.removeChild(this._$nestedTableRow);
     }
 
-    const _row = row || this._rows.find(i => i.expanded);
+    const _row = row || this.rows.find(i => i.expanded);
 
     if (_row) _row.expanded = !_row.expanded;
+  }
+
+  _rowSelectionChanged($event: MouseEvent, rows: RowData<T>[]): boolean {
+    this._$element.dispatchEvent(
+      DOM.createCustomEvent("row-selection-changed", {
+        bubbles: true,
+        detail: {
+          $event,
+          selection: rows.map(row => ({ row, column: null }))
+        }
+      })
+    );
+
+    this._updateHeaderRow();
+    rows.forEach(row => this._updatedSelectedItems(row));
+
+    return true;
+  }
+
+  _updateHeaderRow(): void {
+    this._headerRow.selected = this.rows.every(r => r.selected);
+  }
+
+  /**
+   * @deprecated use row.selected property instead
+   */
+  _updatedSelectedItems(row: RowData<T>): void {
+    if (this.selectedItems) {
+      const index = this.selectedItems.indexOf(row.item);
+
+      if (row.selected && index === -1) {
+        this.selectedItems.push(row.item);
+      } else if (!row.selected) {
+        this.selectedItems.splice(this.selectedItems.indexOf(row.item), 1);
+      }
+    }
   }
 }

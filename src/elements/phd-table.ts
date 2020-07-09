@@ -355,7 +355,7 @@ export class PhdTableCustomElement<T> {
         bubbles: true,
         detail: {
           $event,
-          selection: rows
+          selection: this.rows
             .filter(r => r.selected)
             .map(row => ({ row, column: null }))
         }

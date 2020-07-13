@@ -4,6 +4,7 @@ export interface RowData<T> {
   item: T;
   expanded?: boolean;
   selected?: boolean;
+  selectable?: boolean;
 }
 
 export interface Header {
@@ -26,12 +27,27 @@ export interface Sort {
 }
 
 export interface Column {
-  header?: Header | string;
+  header?: Partial<Header> | string;
   hidden?: boolean;
   field?: string | string[];
   sort?: Sort;
-  renderer?: <T>({ item }: { item: T }) => string;
+  renderer?: <T>({
+    column,
+    row,
+    item
+  }: {
+    column?: Column;
+    row?: RowData<T>;
+    item?: T;
+  }) => string;
   formatter?: <T>({ item }: { item: T }) => string;
+  /**
+   * Marks the column as a selection column, rendering a checkbox along with any
+   * custom markup provided in the column through the field, renderer or formatter
+   * properties
+   *
+   */
+  selection?: boolean;
   style?: { [key: string]: string };
   className?: string;
 }

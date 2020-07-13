@@ -25,6 +25,7 @@ type RowData<T> = import("../model").RowData<T>;
 type BindingContext = Record<string, PropertyValue>;
 type CellClickedArgs<T> = import("../model").CellClickedArgs<T>;
 type RowEvent<T> = import("../model").RowEvent<T>;
+type Header = import("../model").Header;
 type HeaderClickedArgs = import("../model").HeaderClickedArgs;
 
 interface PhdTableInstruction extends BehaviorInstruction {
@@ -193,11 +194,46 @@ export class PhdTableCustomElement<T> {
         header:
           !c.header && typeof c.field === "string"
             ? toTitleCase(c.field)
-            : c.header
+            : c.header || ""
       }));
 
     this.optionsChanged();
     this._sort();
+
+    const selectionColumns = this._columns.filter(c => c.selection);
+
+    if (this.options.selection) {
+      const checkbox = {
+        header: {
+          template: `<header-selector row.bind="_headerRow"
+                                      change.delegate="_selectAllRows($event)"
+                    ></header-selector>`
+        },
+        renderer: ({ row }): string =>
+          row.selectable === false
+            ? ""
+            : `<cell-selector row.bind="row" index.bind="$index"
+                              change.delegate="_rowSelectionChanged($event, [ row ])"
+              ></cell-selector>`
+      };
+      if (!selectionColumns.length) {
+        this._columns.unshift(checkbox);
+      } else {
+        selectionColumns.forEach(col => {
+          const originalColumn = { ...col };
+          col.header = {
+            name:
+              typeof originalColumn === "string"
+                ? originalColumn
+                : (originalColumn as Header).name,
+            template:
+              checkbox.header.template + this._renderHeader(originalColumn)
+          };
+          col.renderer = ({ row }): string =>
+            checkbox.renderer({ row }) + this._render(row, originalColumn);
+        });
+      }
+    }
   }
 
   selectedItemsChanged(): void {
@@ -240,7 +276,14 @@ export class PhdTableCustomElement<T> {
     return false;
   }
 
-  _headerClicked(args: HeaderClickedArgs): void {
+  _headerClicked(args: HeaderClickedArgs): boolean {
+    if (
+      (args.$event.target as Element).closest("header-selector") !== null ||
+      args.column.sort === null
+    ) {
+      return true;
+    }
+
     const sortableColumns = this._columns.filter(
       c => c.sort && c !== args.column
     );
@@ -268,6 +311,34 @@ export class PhdTableCustomElement<T> {
     }
 
     this._sort();
+
+    return true;
+  }
+
+  _renderHeader(column: Column): string {
+    if (typeof column.header === "string") {
+      return column.header;
+    }
+
+    return column.header.template || column.header.name;
+  }
+
+  _render<T>(row: RowData<T>, column: Column): string {
+    if (column.renderer) {
+      return column.renderer({ row, column, item: row.item });
+    }
+
+    if (column.formatter) {
+      return column.formatter({ item: row.item });
+    }
+
+    if (!column.field) {
+      return "";
+    }
+
+    return Array.isArray(column.field)
+      ? getIn(row.item, column.field)
+      : row.item[column.field];
   }
 
   _getFieldData<T>(item: T, column: Column): string {
@@ -285,12 +356,13 @@ export class PhdTableCustomElement<T> {
   }
 
   _selectAllRows($event: MouseEvent): boolean {
-    const allSelected = this.rows.every(row => row.selected);
-    this.rows.forEach(row => (row.selected = !allSelected));
+    const selectableRows = this.rows.filter(r => r.selectable !== false);
+    const allSelected = selectableRows.every(row => row.selected);
+    selectableRows.forEach(row => (row.selected = !allSelected));
 
-    this.rows.forEach(row => this._updatedSelectedItems(row));
+    selectableRows.forEach(row => this._updatedSelectedItems(row));
 
-    return this._rowSelectionChanged($event, this.rows);
+    return this._rowSelectionChanged($event, selectableRows);
   }
 
   _sort(): void {
@@ -369,7 +441,9 @@ export class PhdTableCustomElement<T> {
   }
 
   _updateHeaderRow(): void {
-    this._headerRow.selected = this.rows.every(r => r.selected);
+    this._headerRow.selected = this.rows
+      .filter(r => r.selectable !== false)
+      .every(r => r.selected);
   }
 
   /**

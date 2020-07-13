@@ -1,11 +1,3 @@
 <template bindable="row, index">
-  <div class="field">
-    <input
-      class="is-checkradio is-small"
-      id="select${index}"
-      type="checkbox"
-      checked.bind="row.selected"
-    />
-    <label for="select${index}"></label>
-  </div>
+  <input id="select${index}" type="checkbox" checked.bind="row.selected" />
 </template>

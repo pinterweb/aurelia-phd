@@ -1,12 +1,3 @@
-<template bindable="row, item">
-  <div class="checkbox">
-    <label for="select${row.index}">
-      <input
-        id="select${row.index}"
-        type="checkbox"
-        checked.bind="row.selected"
-        model.bind="item"
-      />
-    </label>
-  </div>
+<template bindable="row, index">
+  <input id="select${index}" type="checkbox" checked.bind="row.selected" />
 </template>

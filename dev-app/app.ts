@@ -11,6 +11,8 @@ const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 @inject("defaultOptions")
 export class App {
   allItems = [];
+  rows = [];
+  _filteredItems = [];
   _authors = authors;
   _searchForm = {};
 
@@ -89,6 +91,12 @@ export class App {
     }
   ];
 
+  _tableOptions = {
+    selection: {
+      highlightOnSelect: true
+    }
+  };
+
   constructor(private _options) {
     this._resetFilter();
   }
@@ -148,6 +156,15 @@ export class App {
 
       return accu;
     }, {});
+  }
+
+  _filterRows(filteredItems: any[]): void {
+    this.rows = filteredItems.map(item => ({
+      item,
+      selected: true
+    }));
+
+    this._filteredItems = filteredItems;
   }
 }
 

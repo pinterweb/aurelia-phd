@@ -59,6 +59,10 @@ export class App {
 
   _itemColumns: ExtendedColumn[] = [
     {
+      selection: true,
+      renderer: ({ row }) => (row.selected ? "&#x2714;" : "")
+    },
+    {
       field: "id"
     },
     {
@@ -134,22 +138,24 @@ export class App {
   }
 
   _resetFilter(): void {
-    this._searchFilter = this._itemColumns.map<Filter>(i => {
-      const fields = Array.isArray(i.field) ? i.field : [i.field];
-      const header: string =
-        i.header && ((i.header as Header).name || (i.header as string));
-      const display =
-        header || (!Array.isArray(i.field) ? i.field : i.field[0]);
+    this._searchFilter = this._itemColumns
+      .filter(i => !i.selection)
+      .map<Filter>(i => {
+        const fields = Array.isArray(i.field) ? i.field : [i.field];
+        const header: string =
+          i.header && ((i.header as Header).name || (i.header as string));
+        const display =
+          header || (!Array.isArray(i.field) ? i.field : i.field[0]);
 
-      return {
-        fields,
-        display,
-        values: (this._searchForm[display] === null
-          ? []
-          : this._searchForm[display] || i.filter || i.values || []
-        ).filter(v => v)
-      } as Filter;
-    });
+        return {
+          fields,
+          display,
+          values: (this._searchForm[display] === null
+            ? []
+            : this._searchForm[display] || i.filter || i.values || []
+          ).filter(v => v)
+        } as Filter;
+      });
 
     this._searchForm = this._searchFilter.reduce((accu, curr) => {
       accu[curr.display] = curr.values;
@@ -159,9 +165,9 @@ export class App {
   }
 
   _filterRows(filteredItems: any[]): void {
-    this.rows = filteredItems.map(item => ({
+    this.rows = filteredItems.map((item, idx) => ({
       item,
-      selected: true
+      selectable: idx % 3 === 0 ? true : false
     }));
 
     this._filteredItems = filteredItems;

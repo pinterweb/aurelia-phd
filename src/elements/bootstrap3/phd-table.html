@@ -2,19 +2,21 @@
   <require from="./header-selector.html"></require>
   <require from="./cell-selector.html"></require>
   <require from="./no-items-area.html"></require>
+  <require from="../phd-table.css"></require>
 
   <table class="table table-hoverable">
     <thead>
       <tr>
-        <th width="0px" show.bind="options.selection">
-          <header-selector
-            row.bind="_headerRow"
-            change.delegate="_selectAllRows($event)"
-          ></header-selector>
-        </th>
         <th repeat.for="column of _columns">
           <a click.delegate="_headerClicked({ $event, column })">
-            ${column.header.name || column.header}
+            <span show.bind="!column.header.template">
+              ${_renderHeader(column)}
+            </span>
+            <span
+              enhance-html="${_renderHeader(column)}"
+              show.bind="column.header.template"
+            >
+            </span>
             <span show.bind="column.sort">
               <span show.bind="column.sort.direction === 'asc'">&#9660;</span>
               <span show.bind="column.sort.direction === 'desc'">&#9650;</span>
@@ -28,24 +30,17 @@
         repeat.for="row of rows | phdSort:_sorts | phdPage:page.size:page.pageNumber"
         class="${options.selection.highlightOnSelect && row.selected ? 'active' : ''}"
       >
-        <td show.bind="options.selection">
-          <cell-selector
-            row.bind="row"
-            index.bind="$index"
-            change.delegate="_rowSelectionChanged($event, [ row ])"
-          ></cell-selector>
-        </td>
         <td
           repeat.for="column of _columns"
           class="${column.className}"
-          click.capture="_cellClicked($event, { row })"
+          click.capture="_cellClicked($event, { row, column })"
         >
           <span
-            if.bind="column.renderer"
+            if.bind="column.renderer({ column, row, item: row.item })"
             style.bind="column.style"
-            enhance-html="${column.renderer({ item: row.item })}"
+            enhance-html="${_render(row, column)}"
           ></span>
-          <span else>${_getFieldData(row.item, column)}</span>
+          <span else>${_render(row, column)}</span>
         </td>
       </tr>
     </tbody>

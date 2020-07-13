@@ -9,6 +9,7 @@ export interface RowData<T> {
 
 export interface Header {
   name: string;
+  template: string;
 }
 
 export interface Page {

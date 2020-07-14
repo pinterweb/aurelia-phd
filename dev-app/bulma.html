@@ -11,7 +11,7 @@
   <div class="container">
     <div>
       <phd-search-bar
-        filter.bind="_searchFilter"
+        filters.bind="_newSearchFilter"
         items.bind="allItems"
         filtered.delegate="_filterRows($event.detail.filteredItems)"
       >
@@ -22,7 +22,7 @@
               class="input"
               type="text"
               placeholder="Title"
-              value.bind="_searchForm.title[0]"
+              value.bind="_newSearchFilter.title.values"
             />
           </div>
         </div>
@@ -32,9 +32,9 @@
           <div class="control">
             <input
               class="input"
-              type="number"
+              type="text"
               placeholder="Duration"
-              value.bind="_searchForm.duration[0] | number"
+              value.bind="_newSearchFilter.duration.values | csv"
             />
           </div>
         </div>
@@ -46,7 +46,7 @@
               class="input"
               type="number"
               placeholder="% Complete"
-              value.bind="_searchForm['% Complete'][0] | number"
+              value.bind="_newSearchFilter['% Complete']"
             />
           </div>
         </div>
@@ -55,7 +55,11 @@
           <label class="label">Author</label>
           <div class="control">
             <div class="select is-multiple">
-              <select multiple size="4" value.bind="_searchForm.Author">
+              <select
+                multiple
+                size="4"
+                value.bind="_newSearchFilter.Author.values"
+              >
                 <option value="">Choose</option>
                 <option value.bind="a" repeat.for="a of _authors">${a}</option>
               </select>
@@ -65,7 +69,7 @@
 
         <div class="field is-grouped">
           <div class="control">
-            <button class="button is-link" click.delegate="_resetFilter()">
+            <button class="button is-link" click.delegate="_refreshFilter()">
               Submit
             </button>
           </div>

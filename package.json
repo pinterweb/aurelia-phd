@@ -72,7 +72,6 @@
     "start": "au run",
     "watch": "au build-plugin --watch",
     "prepare": "npm run build",
-    "pretest": "au lint",
     "prettyup": "pretty-quick --staged",
     "preversion": "au test",
     "test": "au test",

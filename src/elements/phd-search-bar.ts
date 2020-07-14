@@ -1,4 +1,4 @@
-import { bindable, computedFrom } from "aurelia-framework";
+import { bindable, computedFrom, LogManager } from "aurelia-framework";
 import { DOM } from "aurelia-pal";
 import { getIn } from "../utils";
 
@@ -6,6 +6,17 @@ import { getIn } from "../utils";
 type SearchableItem = any;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 type FilterMethod = (items: SearchableItem[]) => SearchableItem[];
+
+type TagChangeEventDetail = import("./phd-tags-input").TagChangeEventDetail;
+
+export interface SearchFilter {
+  values: string[];
+  fields?: string[];
+}
+
+export interface SearchFilters {
+  [key: string]: SearchFilter;
+}
 
 export interface FilterEventDetail {
   filter: Filter[];
@@ -53,11 +64,18 @@ function _objToQueryStr(params: { [key: string]: string | string[] }): string {
     .join("&");
 }
 
+const logger = LogManager.getLogger("aurelia-phd");
+
 export class PhdSearchBarCustomElement {
   static inject = [Element];
 
   @bindable items: SearchableItem[] = [];
+  /**
+   * @deprecated use filters bindable instead
+   *
+   */
   @bindable filter: Filter[] | string;
+  @bindable filters: SearchFilters = {};
   @bindable method: FilterMethod;
 
   _searching = false;
@@ -78,15 +96,27 @@ export class PhdSearchBarCustomElement {
   }
 
   attached(): void {
-    this.filterChanged();
+    this.filtersChanged();
   }
 
   bind(): void {
-    // stop propertyChanged methods from firing before element is setup
+    if (this.filter) {
+      logger.warn(
+        "filter is deprecated. Used the bindable filters (plural) bindable instead"
+      );
+    }
   }
 
   itemsChanged(): void {
     if (this.items && Array.isArray(this.items)) this._handleSubmit();
+  }
+
+  filtersChanged(): void {
+    if (Object.keys(this.filters).length) {
+      this._createTags();
+      this._convertToFilter();
+    }
+    this.filterChanged();
   }
 
   filterChanged(): void {
@@ -99,6 +129,36 @@ export class PhdSearchBarCustomElement {
     }
 
     this._searching = false;
+  }
+
+  _handleTagPush(detail: TagChangeEventDetail): boolean {
+    const targetFilter = this.filters[detail.key];
+
+    if (!targetFilter) {
+      this.filters[detail.key] = {
+        values: detail.relatedValues
+      };
+    } else {
+      targetFilter.values = detail.relatedValues;
+    }
+
+    this._convertToFilter();
+    this._handleSubmit();
+
+    return true;
+  }
+
+  _handleTagDelete(detail: TagChangeEventDetail): boolean {
+    const targetFilter = this.filters[detail.key];
+
+    if (targetFilter) {
+      targetFilter.values = targetFilter.values.filter(v => v !== detail.value);
+    }
+
+    this._convertToFilter();
+    this._handleSubmit();
+
+    return true;
   }
 
   _tagAdded(term: string): void {
@@ -184,6 +244,28 @@ export class PhdSearchBarCustomElement {
     );
 
     return false;
+  }
+
+  _createTags(): void {
+    this._tags = [].concat(
+      ...Object.keys(this.filters)
+        .filter(
+          key =>
+            this.filters[key] &&
+            this.filters[key].values &&
+            this.filters[key].values.length
+        )
+        .map(key => this.filters[key].values.map(v => `${key}=${v}`))
+    );
+  }
+
+  _convertToFilter(): void {
+    this.filter = Object.keys(this.filters).map(key => ({
+      display: key,
+      values: (this.filters[key] && this.filters[key].values) || [],
+      fields: (this.filters[key] && this.filters[key].fields) || [key],
+      tags: []
+    }));
   }
 
   _filterLike(): SearchableItem[] {

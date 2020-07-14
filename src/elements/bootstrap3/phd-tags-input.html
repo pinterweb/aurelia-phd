@@ -10,7 +10,7 @@
         ${t}
         <span
           class="input__icon--clickable"
-          click.trigger="_removeButtonClicked($index)"
+          click.trigger="_handleRemoveClick($index)"
         >
           &times;
         </span>
@@ -22,7 +22,7 @@
           placeholder="${placeholder}"
           value.bind="_newTagValue"
           type="text"
-          change.delegate="_inputChanged()"
+          change.delegate="_handleInputChange()"
           keydown.delegate="_handleKeydown($event)"
         />
       </slot>

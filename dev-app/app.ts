@@ -6,6 +6,8 @@ interface ExtendedColumn extends Column {
   [x: string]: any;
 }
 
+type SearchFilters = import("resources").SearchFilters;
+
 const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 
 @inject("defaultOptions")
@@ -56,6 +58,19 @@ export class App {
   };
 
   _searchFilter: Filter[];
+  _newSearchFilter: SearchFilters = {
+    duration: {
+      values: ["65", "45"]
+    },
+    ["% Complete"]: {
+      values: [],
+      fields: ["percentComplete"]
+    },
+    Author: {
+      values: [],
+      fields: ["author", "firstName"]
+    }
+  };
 
   _itemColumns: ExtendedColumn[] = [
     {
@@ -164,6 +179,12 @@ export class App {
     }, {});
   }
 
+  _refreshFilter(): void {
+    this._newSearchFilter = {
+      ...this._newSearchFilter
+    };
+  }
+
   _filterRows(filteredItems: any[]): void {
     this.rows = filteredItems.map((item, idx) => ({
       item,
@@ -183,5 +204,15 @@ export class NumberValueConverter {
 
   fromView(value: string): number {
     return value === "" ? null : Number(value);
+  }
+}
+
+export class CsvValueConverter {
+  toView(value): string {
+    return !value ? "" : value.join(",");
+  }
+
+  fromView(value): any[] {
+    return !value ? [] : value.split(",");
   }
 }

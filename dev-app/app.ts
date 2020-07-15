@@ -220,10 +220,10 @@ export class NumberValueConverter {
 
 export class CsvValueConverter {
   toView(value): string {
-    return !value ? "" : value.join(",");
+    return !Array.isArray(value) ? "" : value.join(",");
   }
 
-  fromView(value): any[] {
+  fromView(value): string[] {
     return !value ? [] : value.split(",");
   }
 }

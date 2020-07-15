@@ -7,8 +7,8 @@
       <div class="control has-icons-left has-icons-right is-expanded">
         <phd-tags-input
           placeholder="New filter"
-          tag-removed.delegate="_removeFilter($event.detail)"
-          change.delegate="_tagAdded($event.target.value)"
+          tagdelete.delegate="_handleTagDelete($event.detail)"
+          tagpush.delegate="_handleTagPush($event.detail)"
           tags.bind="_tags"
         ></phd-tags-input>
         <span

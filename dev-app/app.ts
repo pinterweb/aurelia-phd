@@ -1,12 +1,8 @@
-import { inject } from "aurelia-framework";
+import { inject, PLATFORM } from "aurelia-framework";
 import { Filter, Column, Header } from "resources";
-import { PLATFORM } from "aurelia-framework";
-
-interface ExtendedColumn extends Column {
-  [x: string]: any;
-}
 
 type SearchFilters = import("resources").SearchFilters;
+type FilterEventDetail = import("resources").FilterEventDetail;
 
 const authors = ["John", "Ben", "Sam", "Tom", "Luke", "Ike", "Hayes", "Lee"];
 
@@ -16,8 +12,6 @@ export class App {
   rows = [];
   _filteredItems = [];
   _authors = authors;
-  _searchForm = {};
-
   _currentFramework;
   _frameworks = {
     bulma: {
@@ -57,14 +51,33 @@ export class App {
     pageNumber: 0
   };
 
-  _searchFilter: Filter[];
+  _searchFilter: Filter[] = [
+    {
+      display: "Duration",
+      values: ["65", "45"],
+      fields: ["duration"]
+    }
+  ];
   _newSearchFilter: SearchFilters = {
-    duration: {
-      values: ["65", "45"]
+    Id: {
+      values: [],
+      fields: ["id"]
+    },
+    Title: {
+      values: [],
+      fields: ["title"]
+    },
+    Duration: {
+      values: ["65", "45"],
+      fields: ["duration"]
     },
     ["% Complete"]: {
       values: [],
       fields: ["percentComplete"]
+    },
+    ["Effort Driven"]: {
+      values: [],
+      fields: ["effortDriven"]
     },
     Author: {
       values: [],
@@ -72,20 +85,22 @@ export class App {
     }
   };
 
-  _itemColumns: ExtendedColumn[] = [
+  _itemColumns: Column[] = [
     {
       selection: true,
       renderer: ({ row }) => (row.selected ? "&#x2714;" : "")
     },
     {
-      field: "id"
+      field: "id",
+      header: "Id"
     },
     {
-      field: "title"
+      field: "title",
+      header: "Title"
     },
     {
       field: "duration",
-      filter: [65]
+      header: "Duration"
     },
     {
       field: "percentComplete",
@@ -99,10 +114,12 @@ export class App {
       }
     },
     {
-      field: "finish"
+      field: "finish",
+      header: "Finish"
     },
     {
-      field: "effortDriven"
+      field: "effortDriven",
+      header: "Effort Driven"
     },
     {
       field: ["author", "firstName"],
@@ -165,33 +182,27 @@ export class App {
         return {
           fields,
           display,
-          values: (this._searchForm[display] === null
-            ? []
-            : this._searchForm[display] || i.filter || i.values || []
+          values: (
+            (this._searchFilter.find(f => f.display === display) || {})
+              .values || []
           ).filter(v => v)
         } as Filter;
       });
 
-    this._searchForm = this._searchFilter.reduce((accu, curr) => {
-      accu[curr.display] = curr.values;
-
-      return accu;
-    }, {});
-  }
-
-  _refreshFilter(): void {
     this._newSearchFilter = {
       ...this._newSearchFilter
     };
   }
 
-  _filterRows(filteredItems: any[]): void {
-    this.rows = filteredItems.map((item, idx) => ({
+  _filterRows(detail: FilterEventDetail): void {
+    this.rows = detail.filteredItems.map((item, idx) => ({
       item,
       selectable: idx % 3 === 0 ? true : false
     }));
 
-    this._filteredItems = filteredItems;
+    this._filteredItems = detail.filteredItems;
+
+    this._searchFilter = detail.filter;
   }
 }
 

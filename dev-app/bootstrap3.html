@@ -13,7 +13,7 @@
       <phd-search-bar
         filter.bind="_searchFilter"
         items.bind="allItems"
-        filtered.delegate="_filterRows($event.detail.filteredItems)"
+        filtered.delegate="_filterRows($event.detail)"
       >
         <div class="form-group">
           <label>Title</label>
@@ -21,7 +21,7 @@
             class="form-control"
             type="text"
             placeholder="Title"
-            value.bind="_searchForm.title[0]"
+            value.bind="_searchFilter[1].values | csv"
           />
         </div>
 
@@ -29,9 +29,9 @@
           <label>Duration</label>
           <input
             class="form-control"
-            type="number"
+            type="text"
             placeholder="Duration"
-            value.bind="_searchForm.duration[0] | number"
+            value.bind="_searchFilter[2].values | csv"
           />
         </div>
 
@@ -39,9 +39,9 @@
           <label>% Complete</label>
           <input
             class="form-control"
-            type="number"
+            type="text"
             placeholder="% Complete"
-            value.bind="_searchForm['% Complete'][0] | number"
+            value.bind="_searchFilter[3].values | csv"
           />
         </div>
 
@@ -51,7 +51,7 @@
             multiple
             size="4"
             class="form-control"
-            value.bind="_searchForm.Author"
+            value.bind="_searchFilter[7].values"
           >
             <option value="">Choose</option>
             <option value.bind="a" repeat.for="a of _authors">${a}</option>
@@ -59,7 +59,7 @@
         </div>
 
         <button class="button is-link" click.delegate="_resetFilter()">
-          Submit
+          Update
         </button>
       </phd-search-bar>
       <phd-table

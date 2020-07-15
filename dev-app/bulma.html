@@ -13,7 +13,7 @@
       <phd-search-bar
         filters.bind="_newSearchFilter"
         items.bind="allItems"
-        filtered.delegate="_filterRows($event.detail.filteredItems)"
+        filtered.delegate="_filterRows($event.detail)"
       >
         <div class="field">
           <label class="label">Title</label>
@@ -22,7 +22,7 @@
               class="input"
               type="text"
               placeholder="Title"
-              value.bind="_newSearchFilter.title.values"
+              value.bind="_newSearchFilter.Title.values | csv"
             />
           </div>
         </div>
@@ -34,7 +34,7 @@
               class="input"
               type="text"
               placeholder="Duration"
-              value.bind="_newSearchFilter.duration.values | csv"
+              value.bind="_newSearchFilter.Duration.values | csv"
             />
           </div>
         </div>
@@ -44,9 +44,9 @@
           <div class="control">
             <input
               class="input"
-              type="number"
+              type="text"
               placeholder="% Complete"
-              value.bind="_newSearchFilter['% Complete']"
+              value.bind="_newSearchFilter['% Complete'].values | csv"
             />
           </div>
         </div>
@@ -69,8 +69,8 @@
 
         <div class="field is-grouped">
           <div class="control">
-            <button class="button is-link" click.delegate="_refreshFilter()">
-              Submit
+            <button class="button is-link" click.delegate="_resetFilter()">
+              Update
             </button>
           </div>
         </div>

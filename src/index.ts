@@ -8,7 +8,12 @@ import "./styles.css";
 import * as framework from "./elements/index";
 
 export * from "./model";
-export { FilterEventDetail, Filter, SearchFilters, SearchFilter } from "./elements/phd-search-bar";
+export {
+  FilterEventDetail,
+  Filter,
+  SearchFilters,
+  SearchFilter
+} from "./elements/phd-search-bar";
 export { TagChangeEventDetail } from "./elements/phd-tags-input";
 export { Model as NavbarModel } from "./elements/phd-navbar";
 

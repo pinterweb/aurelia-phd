@@ -19,6 +19,7 @@ export interface SearchFilters {
 }
 
 export interface FilterEventDetail {
+  filters: SearchFilters;
   filter: Filter[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filteredItems: any[];
@@ -96,7 +97,11 @@ export class PhdSearchBarCustomElement {
   }
 
   attached(): void {
-    this.filtersChanged();
+    if (Object.keys(this.filters).length) {
+      this.filtersChanged();
+    } else {
+      this.filterChanged();
+    }
   }
 
   bind(): void {
@@ -113,22 +118,18 @@ export class PhdSearchBarCustomElement {
 
   filtersChanged(): void {
     if (Object.keys(this.filters).length) {
-      this._createTags();
       this._convertToFilter();
+      this._createTags();
     }
-    this.filterChanged();
   }
 
   filterChanged(): void {
     if (typeof this.filter === "string") {
       this._tagAdded(this.filter);
-      this._handleSubmit();
     } else if (this._isFilterArray(this.filter)) {
       this._filters = [...this.filter.map(f => ({ ...f, tags: [] }))];
-      this._handleSubmit();
+      this._createTags();
     }
-
-    this._searching = false;
   }
 
   _handleTagPush(detail: TagChangeEventDetail): boolean {
@@ -223,6 +224,7 @@ export class PhdSearchBarCustomElement {
       DOM.createCustomEvent("filtered", {
         bubbles: true,
         detail: {
+          filters: this.filters,
           filter: this._filters.map<Filter>(f => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { tags, ...filter } = f;
@@ -234,7 +236,9 @@ export class PhdSearchBarCustomElement {
             this._filters.reduce(
               (accu, f) => ({
                 ...accu,
-                [f.fields.join(".")]: f.values.join()
+                [f.fields.join(".")]: Array.isArray(f.values)
+                  ? f.values.join()
+                  : ""
               }),
               {}
             )
@@ -243,32 +247,12 @@ export class PhdSearchBarCustomElement {
       })
     );
 
+    this._searching = false;
+
     return false;
   }
 
   _createTags(): void {
-    this._tags = [].concat(
-      ...Object.keys(this.filters)
-        .filter(
-          key =>
-            this.filters[key] &&
-            this.filters[key].values &&
-            this.filters[key].values.length
-        )
-        .map(key => this.filters[key].values.map(v => `${key}=${v}`))
-    );
-  }
-
-  _convertToFilter(): void {
-    this.filter = Object.keys(this.filters).map(key => ({
-      display: key,
-      values: (this.filters[key] && this.filters[key].values) || [],
-      fields: (this.filters[key] && this.filters[key].fields) || [key],
-      tags: []
-    }));
-  }
-
-  _filterLike(): SearchableItem[] {
     this._tags = [].concat(
       ...this._filters
         .filter(s => s.values.length)
@@ -282,7 +266,19 @@ export class PhdSearchBarCustomElement {
           });
         })
     );
+  }
 
+  _convertToFilter(): void {
+    this._filters = this.filter = Object.keys(this.filters).map(key => ({
+      display: key,
+      values: (this.filters[key] && this.filters[key].values) || [],
+      fields:
+        (this.filters[key] && this.filters[key].fields) || (key ? [key] : []),
+      tags: []
+    }));
+  }
+
+  _filterLike(): SearchableItem[] {
     if (!this.items || !this.items.length) {
       return this.items;
     }

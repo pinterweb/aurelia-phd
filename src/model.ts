@@ -32,6 +32,9 @@ export interface Column {
   hidden?: boolean;
   field?: string | string[];
   sort?: Sort;
+  /**
+   * @deprecated use template property instead
+   */
   renderer?: <T>({
     column,
     row,

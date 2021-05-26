@@ -17,8 +17,22 @@ export {
 export { TagChangeEventDetail } from "./elements/phd-tags-input";
 export { Model as NavbarModel } from "./elements/phd-navbar";
 
+export const FRAMEWORK = "aurelia-phd-framework";
+
 interface PluginOptions {
   framework: string;
+}
+
+interface Options {
+  classes: string[];
+}
+
+interface TableOptions {
+  table: Options;
+}
+
+export interface Framework {
+  table: TableOptions;
 }
 
 export function configure(
@@ -35,7 +49,8 @@ export function configure(
     PLATFORM.moduleName("./elements/phd-navbar"),
     PLATFORM.moduleName("./value-converters/phd-page-value-converter"),
     PLATFORM.moduleName("./value-converters/phd-sort-value-converter"),
-    PLATFORM.moduleName("./attributes/enhance-html")
+    PLATFORM.moduleName("./attributes/enhance-html"),
+    PLATFORM.moduleName("./attributes/phd-table")
   ]);
 
   if (!options || !options.framework) {
@@ -47,7 +62,7 @@ export function configure(
   } else {
     const original = ViewLocator.prototype.convertOriginToViewUrl;
 
-    framework[options.framework]();
+    framework[options.framework](aurelia);
 
     ViewLocator.prototype.convertOriginToViewUrl = function(origin): string {
       const moduleId = origin.moduleId;

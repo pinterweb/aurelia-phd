@@ -312,6 +312,20 @@ export class PhdTableCustomElement<T> {
 
     this._sort();
 
+    this._$element.dispatchEvent(
+      DOM.createCustomEvent("phd-table-sorted", {
+        bubbles: true,
+        detail: {
+          ...args,
+          // see bug #28, reverse order is actually ascending
+          sortedColumns: sortableColumns
+            .concat([args.column])
+            .filter(c => c.sort.direction)
+            .sort((a, b) => b.sort.order - a.sort.order)
+        }
+      })
+    );
+
     return true;
   }
 

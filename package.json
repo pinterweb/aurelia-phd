@@ -76,6 +76,7 @@
     "preversion": "au test",
     "test": "au test",
     "prerelease": "npm run build && npm run test",
+    "prepare": "npm run build",
     "release": "standard-version --infile ./doc/CHANGELOG.md"
   },
   "engines": {
